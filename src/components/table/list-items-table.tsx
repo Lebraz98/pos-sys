@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   Divider,
-  Drawer,
   Flex,
   ScrollArea,
   Stack,
@@ -12,69 +11,19 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import {
   IconCalculator,
-  IconDots,
-  IconFiles,
-  IconHistory,
   IconPlus,
   IconSearch,
   IconTrash,
   IconUsersGroup,
   IconX,
 } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+import MenuComponent from "../layout/menu-component";
 
 export default function ListItemsTable() {
-  const [opened, menu] = useDisclosure(false);
-
-  const { push } = useRouter();
   return (
     <Flex>
-      <Drawer
-        opened={opened}
-        position="right"
-        onClose={menu.close}
-        title="Management"
-        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
-        size={"xs"}
-        p={0}
-        m={0}
-      >
-        <Drawer.Body p={0} m={0}>
-          <Stack>
-            <Button
-              fullWidth
-              leftSection={<IconFiles />}
-              style={{
-                backgroundColor: "transparent",
-                display: "flex",
-              }}
-              onClick={() => {
-                push("/dashboard/products");
-              }}
-            >
-              Products
-            </Button>
-            <Divider />
-            <Button
-              fullWidth
-              leftSection={<IconHistory />}
-              style={{
-                backgroundColor: "transparent",
-                display: "flex",
-              }}
-              onClick={() => {
-                push("/dashboard/products");
-              }}
-            >
-              View Sales History
-            </Button>
-          </Stack>
-        </Drawer.Body>
-      </Drawer>
-
       <Stack
         flex={1}
         style={{
@@ -202,14 +151,7 @@ export default function ListItemsTable() {
             <Button fullWidth leftSection={<IconUsersGroup />} color="blue">
               Customer
             </Button>
-            <Button
-              fullWidth
-              leftSection={<IconDots />}
-              color="gray"
-              onClick={() => {
-                menu.open();
-              }}
-            ></Button>
+            <MenuComponent />
           </Flex>
         </Stack>
       </Card>
