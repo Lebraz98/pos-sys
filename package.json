@@ -19,7 +19,7 @@
     "@mantine/form": "^7.14.3",
     "@mantine/hooks": "^7.14.3",
     "@mantine/modals": "^7.14.3",
-    "@mantine/notifications": "^7.14.3",
+    "@mantine/notifications": "^7.15.0",
     "@mantine/nprogress": "^7.14.3",
     "@mantine/spotlight": "^7.14.3",
     "@mantine/tiptap": "^7.14.3",

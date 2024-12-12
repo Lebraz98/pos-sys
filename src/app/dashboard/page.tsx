@@ -1,9 +1,13 @@
-import ListItemsTable from "@/components/table/list-items-table";
+import SaleItemsTable from "@/components/table/sales-item-table";
+import { getCustomers } from "@/services/customer-service";
+import { getItems } from "@/services/item-service";
 
-export default function page() {
+export default async function page() {
+  const items = await getItems();
+  const customers = await getCustomers();
   return (
     <div style={{ height: "100%" }}>
-      <ListItemsTable />
+      <SaleItemsTable items={items} customers={customers} />
     </div>
   );
 }

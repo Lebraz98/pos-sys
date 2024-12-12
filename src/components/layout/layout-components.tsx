@@ -11,7 +11,7 @@ export default function LayoutComponent({
   return (
     <div>
       <HeaderComponent />
-      <Box component="main" h={"100%"}>
+      <Box component="main" h={"100%"} mt={10}>
         {children}
       </Box>
     </div>

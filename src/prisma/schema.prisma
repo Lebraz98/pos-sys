@@ -10,43 +10,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int     @id @default(autoincrement())
-  name     String
-  username String
-  password String
-  sales    Sale[]
-  role     String  @default("USER")
-  active   Boolean @default(true)
-  token    String?
-}
-
-model Category {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String
-  products    Product[]
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
-  barCode     String     @unique
+  id          Int      @id @default(autoincrement())
+  barcode     String?
   name        String
-  description String
-  price       Float
-  categoryId  Int
-  category    Category   @relation(fields: [categoryId], references: [id])
-  active      Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  saleItems   SaleItem[]
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       Item[]
+}
+
+model Item {
+  id           Int        @id @default(autoincrement())
+  serialNumber String?
+  name         String
+  description  String?
+  buy          Float
+  sell         Float
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  saleItems    SaleItem[]
+  product      Product    @relation(fields: [productId], references: [id])
+  productId    Int
 }
 
 model Sale {
   id           Int           @id @default(autoincrement())
-  userId       Int
-  user         User          @relation(fields: [userId], references: [id])
-  total        Float
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   saleItems    SaleItem[]
@@ -55,6 +54,8 @@ model Sale {
   type         String        @default("CASH")
   salePayments SalePayment[]
   status       String        @default("OPEN")
+  invoiceId    Int?
+  note         String?
 }
 
 model SalePayment {
@@ -65,29 +66,21 @@ model SalePayment {
   type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  paymentId Int?
 }
 
 model SaleItem {
-  id        Int     @id @default(autoincrement())
-  saleId    Int
-  sale      Sale    @relation(fields: [saleId], references: [id])
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  price     Float
-  total     Float
-}
-
-model Customer {
-  id        Int      @id @default(autoincrement())
-  name      String
-  document  String
-  phone     String
-  email     String
-  address   String
-  city      String
-  state     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sales     Sale[]
+  id             Int       @id @default(autoincrement())
+  saleId         Int
+  sale           Sale?     @relation(fields: [saleId], references: [id])
+  itemId         Int
+  quantity       Int
+  price          Float
+  note           String?
+  total          Float
+  startGuarantee DateTime?
+  endGuarantee   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  item           Item?     @relation(fields: [itemId], references: [id])
 }

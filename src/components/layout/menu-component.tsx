@@ -1,9 +1,14 @@
 "use client";
 import { Button, Divider, Drawer, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconDots, IconFiles, IconHistory } from "@tabler/icons-react";
+import {
+  IconDots,
+  IconFiles,
+  IconHistory,
+  IconTools,
+  IconUser,
+} from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import React from "react";
 
 export default function MenuComponent() {
   const [opened, menu] = useDisclosure(false);
@@ -37,6 +42,19 @@ export default function MenuComponent() {
             >
               Products
             </Button>
+            <Button
+              fullWidth
+              leftSection={<IconTools />}
+              style={{
+                backgroundColor: "transparent",
+                display: "flex",
+              }}
+              onClick={() => {
+                push("/dashboard/items");
+              }}
+            >
+              Items
+            </Button>
             <Divider />
             <Button
               fullWidth
@@ -53,16 +71,16 @@ export default function MenuComponent() {
             </Button>
             <Button
               fullWidth
-              leftSection={<IconHistory />}
+              leftSection={<IconUser />}
               style={{
                 backgroundColor: "transparent",
                 display: "flex",
               }}
               onClick={() => {
-                push("/dashboard/users");
+                push("/dashboard/customers");
               }}
             >
-              Users
+              Customers{" "}
             </Button>
           </Stack>
         </Drawer.Body>
