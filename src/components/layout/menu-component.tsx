@@ -64,7 +64,7 @@ export default function MenuComponent() {
                 display: "flex",
               }}
               onClick={() => {
-                push("/dashboard/products");
+                push("/dashboard/sale-history");
               }}
             >
               View Sales History

@@ -54,7 +54,7 @@ model Sale {
   type         String        @default("CASH")
   salePayments SalePayment[]
   status       String        @default("OPEN")
-  invoiceId    Int?
+  invoiceId    String?
   note         String?
 }
 
@@ -66,7 +66,7 @@ model SalePayment {
   type      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  paymentId Int?
+  paymentId String?
 }
 
 model SaleItem {

@@ -27,9 +27,11 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import MenuComponent from "../layout/menu-component";
+import { createSale } from "@/services/sale-service";
+import { notifications } from "@mantine/notifications";
 
 export default function SaleItemsTable(props: {
   items: Prisma.ItemGetPayload<{
@@ -42,15 +44,7 @@ export default function SaleItemsTable(props: {
   const searchQuery = useSearchParams();
 
   const [search, setSearch] = useState<string>("");
-  const itemSearchResult = useMemo(() => {
-    return search === ""
-      ? []
-      : props.items.filter(
-          (item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.serialNumber?.toLowerCase().includes(search.toLowerCase())
-        );
-  }, [props.items, search]);
+
   const form = useForm<SaleValidator>({
     resolver: zodResolver(SaleValidator),
     defaultValues: {
@@ -86,6 +80,20 @@ export default function SaleItemsTable(props: {
     },
     [form, watchItems]
   );
+  const itemSearchResult = useMemo(() => {
+    if (search === "") {
+      return [];
+    }
+    const findItem = props.items.find((item) => item.serialNumber === search);
+    if (findItem) {
+      addItem(findItem);
+    }
+    return props.items.filter(
+      (item) =>
+        item.name.toLowerCase().includes(search.toLowerCase()) ||
+        item.serialNumber?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [addItem, props.items, search]);
 
   const items = useMemo(() => {
     return props.items.reduce(
@@ -102,13 +110,8 @@ export default function SaleItemsTable(props: {
       }
     );
   }, [props.items]);
+  const [isPeding, setTransition] = useTransition();
 
-  const handleSubmit = useCallback(
-    (data: SaleValidator) => {
-      console.log(data);
-    },
-    [form]
-  );
   const totals = useMemo(() => {
     return watchItems.reduce(
       (acc, cur) => {
@@ -124,7 +127,7 @@ export default function SaleItemsTable(props: {
         total: 0,
       }
     );
-  }, [watchItems]);
+  }, [items, watchItems]);
   const onSelect = useCallback((i: number) => setSelectedItem(i), []);
 
   const customers = useMemo(
@@ -136,8 +139,18 @@ export default function SaleItemsTable(props: {
     [props.customers]
   );
   const route = useRouter();
-  console.log(form.formState.errors);
-
+  const handleSubmit = useCallback(
+    (data: SaleValidator) => {
+      setTransition(() => {
+        createSale(data).then((res) => {
+          notifications.show({ message: res.message });
+          route.replace("/dashboard");
+          form.reset();
+        });
+      });
+    },
+    [form, route]
+  );
   return (
     <Flex
       style={{
@@ -173,7 +186,18 @@ export default function SaleItemsTable(props: {
                 />
               )}
             />
-
+            <Controller
+              name="invoiceId"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <TextInput
+                  error={fieldState.error?.message}
+                  label="Invoice Id"
+                  dir="auto"
+                  onChange={field.onChange}
+                />
+              )}
+            />
             <Controller
               name="note"
               control={form.control}
@@ -187,7 +211,7 @@ export default function SaleItemsTable(props: {
                 />
               )}
             />
-            <Button type="submit" mt={5}>
+            <Button type="submit" mt={5} loading={isPeding}>
               Submit
             </Button>
           </Box>

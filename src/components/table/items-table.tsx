@@ -60,7 +60,7 @@ export default function ItemTable(props: {
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Action</Table.Th>
-                  <Table.Th>BarCode</Table.Th>
+                  <Table.Th>Serial Number</Table.Th>
                   <Table.Th>Name</Table.Th>
                   <Table.Th>Description</Table.Th>
                   <Table.Th>Buy</Table.Th>
