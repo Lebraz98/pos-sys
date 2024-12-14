@@ -64,7 +64,7 @@ export async function createItem(data: ItemValidator) {
       },
     });
   }
-  revalidatePath("/dashboard/items");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Item created successfully",
   };
@@ -96,7 +96,7 @@ export async function updateItem(id: number, data: ItemValidator) {
     },
   });
 
-  revalidatePath("/dashboard/items");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Item updated successfully",
   };
@@ -123,7 +123,7 @@ export async function deleteItem(id: number) {
     },
   });
 
-  revalidatePath("/dashboard/items");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Item deleted successfully",
   };

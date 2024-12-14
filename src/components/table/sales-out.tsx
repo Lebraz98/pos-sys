@@ -265,7 +265,7 @@ export default function SaleItemsTable(props: {
             </List>
           </Box>
         </Box>
-        <Card shadow="xs" padding="xl" radius="0" withBorder h={"320px"}>
+        <Card shadow="xs" padding="xl" radius="0" withBorder h={340}>
           <Stack h={"100%"}>
             <Flex justify="space-between">
               <Title order={4}>Total:</Title>
@@ -347,14 +347,14 @@ export default function SaleItemsTable(props: {
                     <Table.Td>
                       $
                       <NumberFormatter
-                        value={items[value.itemId].sell}
+                        value={value.price}
                         thousandSeparator=","
                       />
                     </Table.Td>
                     <Table.Td>
                       $
                       <NumberFormatter
-                        value={items[value.itemId].sell * value.quantity}
+                        value={value.price * value.quantity}
                         thousandSeparator=","
                       />{" "}
                     </Table.Td>
@@ -486,6 +486,7 @@ export default function SaleItemsTable(props: {
                             ? {
                                 ...item,
                                 price: parseInt(price),
+
                                 total: item.price * parseInt(price),
                               }
                             : item

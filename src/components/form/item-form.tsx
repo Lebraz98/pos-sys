@@ -1,10 +1,8 @@
 "use client";
 import { createItem, getItem, updateItem } from "@/services/item-service";
-import { getProducts } from "@/services/product-service";
 import ItemValidator from "@/validator/item-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ActionIcon,
   Box,
   Button,
   Flex,
@@ -19,7 +17,7 @@ import { notifications } from "@mantine/notifications";
 import type { Item, Product } from "@prisma/client";
 import { IconPlus } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 export default function ItemFrom(props: { products: Product[] }) {
@@ -122,7 +120,7 @@ export default function ItemFrom(props: { products: Product[] }) {
   return (
     <>
       <Flex align={"end"} justify={"end"} mb={5}>
-        <ActionIcon
+        <Button
           onClick={() => {
             const searchParams = new URLSearchParams(params.toString());
             searchParams.set("open", "true");
@@ -131,7 +129,7 @@ export default function ItemFrom(props: { products: Product[] }) {
           }}
         >
           <IconPlus />
-        </ActionIcon>
+        </Button>
       </Flex>
 
       <Modal title="Item Form" opened={isOpen} onClose={onClose} size={"sm"}>

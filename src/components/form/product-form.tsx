@@ -7,7 +7,6 @@ import {
 import ProductValidator from "@/validator/product-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ActionIcon,
   Box,
   Button,
   Flex,
@@ -112,7 +111,7 @@ export default function ProductFrom() {
   return (
     <>
       <Flex align={"end"} justify={"end"} mb={5}>
-        <ActionIcon
+        <Button
           onClick={() => {
             const searchParams = new URLSearchParams(params.toString());
             searchParams.set("open", "true");
@@ -121,7 +120,7 @@ export default function ProductFrom() {
           }}
         >
           <IconPlus />
-        </ActionIcon>
+        </Button>
       </Flex>
 
       <Modal title="Product Form" opened={isOpen} onClose={onClose} size={"sm"}>

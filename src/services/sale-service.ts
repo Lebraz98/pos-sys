@@ -68,7 +68,7 @@ export async function createSale(data: SaleValidator) {
     });
   }
 
-  revalidatePath("/dashboard/sales");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Sale created successfully",
   };
@@ -137,7 +137,7 @@ export async function deleteSale(id: number) {
     },
   });
 
-  revalidatePath("/dashboard/sales");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Sale deleted successfully",
   };

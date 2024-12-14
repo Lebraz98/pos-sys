@@ -61,7 +61,7 @@ export async function createCustomer(data: CustomerValidator) {
       },
     });
   }
-  revalidatePath("/dashboard/customers");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Customer created successfully",
   };
@@ -93,7 +93,7 @@ export async function updateCustomer(id: number, data: CustomerValidator) {
     },
   });
 
-  revalidatePath("/dashboard/customers");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Customer updated successfully",
   };
@@ -120,7 +120,7 @@ export async function deleteCustomer(id: number) {
     },
   });
 
-  revalidatePath("/dashboard/customers");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Customer deleted successfully",
   };

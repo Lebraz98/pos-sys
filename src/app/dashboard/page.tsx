@@ -1,4 +1,4 @@
-import SaleItemsTable from "@/components/table/sales-item-table";
+import SaleItemsTable from "@/components/table/sales-out";
 import { getCustomers } from "@/services/customer-service";
 import { getItems } from "@/services/item-service";
 import { Suspense } from "react";

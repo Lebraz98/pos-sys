@@ -10,6 +10,9 @@ export async function getProducts() {
     orderBy: {
       id: "desc",
     },
+    include: {
+      items: true,
+    },
   });
 }
 export async function getProduct(id: number) {
@@ -59,7 +62,7 @@ export async function createProduct(data: ProductValidator) {
       },
     });
   }
-  revalidatePath("/dashboard/products");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Product created successfully",
   };
@@ -91,7 +94,7 @@ export async function updateProduct(id: number, data: ProductValidator) {
     },
   });
 
-  revalidatePath("/dashboard/products");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Product updated successfully",
   };
@@ -118,7 +121,7 @@ export async function deleteProduct(id: number) {
     },
   });
 
-  revalidatePath("/dashboard/products");
+  revalidatePath("/dashboard", "layout");
   return {
     message: "Product deleted successfully",
   };
