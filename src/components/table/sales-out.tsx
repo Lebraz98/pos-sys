@@ -1,4 +1,6 @@
 "use client";
+import { createSale } from "@/services/sale-service";
+import type { Customer, Item } from "@/types";
 import SaleValidator from "@/validator/sale-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,7 +20,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import type { Customer, Item, Prisma } from "@prisma/client";
+import { notifications } from "@mantine/notifications";
 import {
   IconCalculator,
   IconMoneybag,
@@ -30,15 +32,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import MenuComponent from "../layout/menu-component";
-import { createSale } from "@/services/sale-service";
-import { notifications } from "@mantine/notifications";
 
 export default function SaleItemsTable(props: {
-  items: Prisma.ItemGetPayload<{
-    include: {
-      product: true;
-    };
-  }>[];
+  items: Item[];
   customers: Customer[];
 }) {
   const searchQuery = useSearchParams();
@@ -102,11 +98,7 @@ export default function SaleItemsTable(props: {
         return acc;
       },
       {} as {
-        [k in number]: Prisma.ItemGetPayload<{
-          include: {
-            product: true;
-          };
-        }>;
+        [k in number]: Item;
       }
     );
   }, [props.items]);
@@ -138,6 +130,7 @@ export default function SaleItemsTable(props: {
       })),
     [props.customers]
   );
+
   const route = useRouter();
   const handleSubmit = useCallback(
     (data: SaleValidator) => {
@@ -151,6 +144,7 @@ export default function SaleItemsTable(props: {
     },
     [form, route]
   );
+
   return (
     <Flex
       style={{
@@ -252,7 +246,7 @@ export default function SaleItemsTable(props: {
                       addItem(item);
                       setSelectedItem(watchItems.length + 1);
                     }}
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", fontSize: 20 }}
                     bg={"gray"}
                     p={5}
                   >
@@ -305,6 +299,11 @@ export default function SaleItemsTable(props: {
         >
           <ScrollArea>
             <Table
+              styles={{
+                td: {
+                  fontSize: 20,
+                },
+              }}
               verticalSpacing={"md"}
               highlightOnHover
               stickyHeader
@@ -358,7 +357,7 @@ export default function SaleItemsTable(props: {
                         thousandSeparator=","
                       />{" "}
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td style={{ backgroundColor: "green" }}>
                       $
                       <NumberFormatter
                         value={value.price * value.quantity}
@@ -366,22 +365,28 @@ export default function SaleItemsTable(props: {
                       />{" "}
                     </Table.Td>
 
-                    <Table.Td>
+                    <Table.Td style={{ color: "red" }}>
                       $
                       <NumberFormatter
                         value={
                           items[value.itemId].sell * value.quantity -
-                          value.price * value.quantity
+                            value.price * value.quantity <
+                          0
+                            ? 0
+                            : items[value.itemId].sell * value.quantity -
+                              value.price * value.quantity
                         }
                         thousandSeparator=","
                       />{" "}
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td style={{ color: "green" }}>
                       $
                       <NumberFormatter
                         value={
-                          value.price * value.quantity -
-                          items[value.itemId].buy * value.quantity
+                          value.price > 0
+                            ? 0
+                            : value.price * value.quantity -
+                              items[value.itemId].buy * value.quantity
                         }
                         thousandSeparator=","
                       />{" "}
@@ -478,7 +483,7 @@ export default function SaleItemsTable(props: {
                 if (old) {
                   const price = prompt("Enter the price: ", old.price + "");
                   if (price) {
-                    if (/^\d+$/.test(price)) {
+                    if (/^-\d+$|^\d+$/.test(price)) {
                       form.setValue(
                         "saleItems",
                         watchItems.map((item, i) =>
@@ -499,7 +504,7 @@ export default function SaleItemsTable(props: {
                 }
               }}
             >
-              Sell
+              Price
             </Button>
             <Button
               fullWidth

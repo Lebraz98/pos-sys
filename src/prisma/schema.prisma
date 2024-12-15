@@ -11,13 +11,14 @@ datasource db {
 }
 
 model Customer {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   phone     String
   address   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   sales     Sale[]
+  expenses  Expense[]
 }
 
 model Product {
@@ -83,4 +84,14 @@ model SaleItem {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   item           Item?     @relation(fields: [itemId], references: [id])
+}
+
+model Expense {
+  id         Int       @id @default(autoincrement())
+  invoiceId  String?
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  amount     Float
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
