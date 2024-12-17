@@ -1,7 +1,7 @@
 import z from "zod";
 
 const ItemNeededValidator = z.object({
-  status: z.string(),
+  status: z.string().default("open"),
   itemId: z.number(),
   quantity: z.number(),
   note: z.string().optional().nullable(),

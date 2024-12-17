@@ -10,7 +10,7 @@ export default async function page() {
   const itemsNeeded = await getItemNeededs();
   return (
     <Suspense fallback={<LoadingOverlay visible />}>
-      <ItemsNeededTable data={itemsNeeded} products={await getProducts()} />
+      <ItemsNeededTable data={itemsNeeded} items={await getItems()} />
     </Suspense>
   );
 }

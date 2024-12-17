@@ -5,6 +5,7 @@ import {
   getItemNeeded,
   updateItemNeeded,
 } from "@/services/items-needed-service";
+import type { Item } from "@/types";
 import ItemNeededValidator from "@/validator/item-needed-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,7 +19,6 @@ import {
   Textarea,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import type { Item } from "@prisma/client";
 import { IconPlus } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useTransition } from "react";

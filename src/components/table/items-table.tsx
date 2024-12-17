@@ -18,6 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useTransition } from "react";
 import ItemFrom from "../form/item-form";
+import { deleteItem } from "@/services/item-service";
 
 export default function ItemTable(props: {
   data: Item[];
@@ -59,10 +60,10 @@ export default function ItemTable(props: {
         key={1}
         onClick={() => {
           setTranstions(() => {
-            deleteProduct(data.row.original.id).then((data) => {
+            deleteItem(data.row.original.id).then((data) => {
               if (data) {
                 notifications.show({
-                  message: "Item has been deleted",
+                  message: data.message,
                   color: "red",
                 });
               }

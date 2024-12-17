@@ -1,5 +1,5 @@
 "use client";
-import { deleteSale } from "@/services/sale-service";
+import { deleteSale, updateSalePayments } from "@/services/sale-service";
 import type { Customer } from "@/types";
 import {
   Box,
@@ -29,7 +29,7 @@ import {
   type MRT_ColumnDef,
 } from "mantine-react-table";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 
 export default function SalesTable(props: {
   data: Prisma.SaleGetPayload<{
@@ -53,6 +53,7 @@ export default function SalesTable(props: {
     dayjs().startOf("D").toDate(),
     dayjs().endOf("D").toDate(),
   ]);
+
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
   const data = useMemo(() => {
@@ -64,7 +65,7 @@ export default function SalesTable(props: {
     );
   }, [date, props.data, selectedCustomer]);
 
-  const [isPeding, setTranstion] = useTransition();
+  const [isPending, setTranstion] = useTransition();
 
   const table = useMantineReactTable({
     columns,
@@ -80,7 +81,12 @@ export default function SalesTable(props: {
       );
       return (
         <Box>
-          <LoadingOverlay visible={isPeding} />
+          <LoadingOverlay visible={isPending} />
+
+          <Title size={"lg"}>Sale Details</Title>
+          <Text>Id: {props.row.original.id}</Text>
+          <Text>Invoice Id: {props.row.original.invoiceId}</Text>
+
           <Box maw={300} bd={1} mb={5}>
             <Text>
               Amout: $
@@ -146,8 +152,38 @@ export default function SalesTable(props: {
         </Box>
       );
     },
+    mantineLoadingOverlayProps: {
+      visible: isPending,
+    },
     enableRowActions: true,
     renderRowActionMenuItems: (data) => [
+      data.row.original.type === "waiting" ? (
+        <MenuItem
+          key={1}
+          onClick={() => {
+            route.push(
+              "/dashboard/sale-history?open-edit=true&" +
+                "id=" +
+                data.row.original.id
+            );
+          }}
+        >
+          <IconEdit />
+        </MenuItem>
+      ) : (
+        <MenuItem
+          key={2}
+          onClick={() => {
+            route.push(
+              "/dashboard/sale-history?open=true&" +
+                "id=" +
+                data.row.original.id
+            );
+          }}
+        >
+          <IconPlus />{" "}
+        </MenuItem>
+      ),
       <MenuItem
         key={0}
         color="red"
@@ -172,34 +208,6 @@ export default function SalesTable(props: {
       >
         <IconX />
       </MenuItem>,
-
-      data.row.original.type === "waiting" ? (
-        <MenuItem
-          key={2}
-          onClick={() => {
-            route.push(
-              "/dashboard/sale-history?open=true&" +
-                "id=" +
-                data.row.original.id
-            );
-          }}
-        >
-          <IconEdit />
-        </MenuItem>
-      ) : (
-        <MenuItem
-          key={1}
-          onClick={() => {
-            route.push(
-              "/dashboard/sale-history?open-edit=true&" +
-                "id=" +
-                data.row.original.id
-            );
-          }}
-        >
-          <IconPlus />{" "}
-        </MenuItem>
-      ),
     ],
   });
 
@@ -267,6 +275,27 @@ export default function SalesTable(props: {
       label: customer.name,
     }));
   }, [props.customers]);
+  const [amount, setAmount] = useState(0);
+  const handleSubmit = useCallback(
+    (e: number) => {
+      if (e) {
+        setTranstion(() => {
+          const id = searchParams.get("id")!;
+
+          updateSalePayments(+id, e).then((data) => {
+            if (data) {
+              notifications.show({
+                message: data.message,
+              });
+              setAmount(0);
+              route.replace("/dashboard/sale-history");
+            }
+          });
+        });
+      }
+    },
+    [route, searchParams]
+  );
 
   return (
     <Box p={6}>
@@ -341,6 +370,7 @@ export default function SalesTable(props: {
         opened={searchParams.get("open") ? true : false}
         onClose={() => {
           route.replace("/dashboard/sale-history");
+          setAmount(0);
         }}
       >
         <Modal.Body>
@@ -352,6 +382,14 @@ export default function SalesTable(props: {
                 gap: 5,
                 flexDirection: "column",
               }}
+              onSubmit={(e) => {
+                e.preventDefault();
+
+                if (amount === 0) {
+                  return;
+                }
+                handleSubmit(amount);
+              }}
             >
               <Text>Invoice Id: {selectedSale?.invoiceId}</Text>
               <Text>For: {selectedSale?.customer.name}</Text>
@@ -361,23 +399,22 @@ export default function SalesTable(props: {
                 Remaining: $
                 <NumberFormatter value={remaining} />
               </Text>
-              <NumberInput label="Paid" min={0} />
-              <Button type="submit">Save</Button>
+              <NumberInput
+                label="Paid"
+                min={0}
+                max={remaining}
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e ? +e : 0);
+                }}
+              />
+              <Button type="submit" loading={isPending}>
+                Save
+              </Button>
             </Box>
           ) : (
             <Text>Already Paid</Text>
           )}
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        opened={searchParams.get("open-edit") ? true : false}
-        onClose={() => {
-          route.replace("/dashboard/sale-history");
-        }}
-      >
-        <Modal.Body>
-          <Text>Modal body</Text>
         </Modal.Body>
       </Modal>
       <MantineReactTable table={table} />

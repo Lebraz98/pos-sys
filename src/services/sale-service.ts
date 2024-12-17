@@ -74,37 +74,54 @@ export async function createSale(data: SaleValidator) {
   };
 }
 
-// export async function updateSale(id: number, data: SaleValidator) {
-//   const isSaleExist = await prisma.sale.findUnique({
-//     where: {
-//       id: id,
-//     },
-//   });
+export async function updateSalePayments(id: number, paid: number) {
+  const isSaleExist = await prisma.sale.findUnique({
+    where: {
+      id: id,
+    },
+    include: {
+      saleItems: true,
+      salePayments: true,
+    },
+  });
 
-//   if (!isSaleExist) {
-//     return {
-//       error: {
-//         key: "id",
-//         message: "Sale not found",
-//       },
-//     };
-//   }
-//   await prisma.sale.update({
-//     where: {
-//       id: id,
-//     },
-//     data: {
-//       name: data.name,
-//       barcode: data.barcode,
-//       description: data.description,
-//     },
-//   });
+  if (!isSaleExist) {
+    return {
+      error: {
+        key: "id",
+        message: "Sale not found",
+      },
+    };
+  }
+  await prisma.salePayment.create({
+    data: {
+      amount: paid,
+      type: "cash",
+      saleId: id,
+    },
+  });
+  if (
+    isSaleExist.salePayments.reduce((a, b) => b.amount + a, 0) + paid ===
+    isSaleExist.saleItems.reduce(
+      (prev, cur) => cur.price * cur.quantity + prev,
+      0
+    )
+  ) {
+    await prisma.sale.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: "CLOSE",
+      },
+    });
+  }
 
-//   revalidatePath("/dashboard/sales");
-//   return {
-//     message: "Sale updated successfully",
-//   };
-// }
+  revalidatePath("/dashboard");
+  return {
+    message: "Sale updated successfully",
+  };
+}
 
 export async function deleteSale(id: number) {
   const isSaleExist = await prisma.sale.findUnique({

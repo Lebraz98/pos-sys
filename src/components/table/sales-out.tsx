@@ -111,7 +111,7 @@ export default function SaleItemsTable(props: {
         const item = items[cur.itemId];
         if (cur) {
           acc.total += cur.price * cur.quantity;
-          acc.discount += item.sell * cur.quantity - cur.price * cur.quantity;
+          acc.discount += cur.price * cur.quantity - acc.total;
         }
         return acc;
       },
@@ -268,25 +268,13 @@ export default function SaleItemsTable(props: {
                 $<NumberFormatter thousandSeparator="," value={totals.total} />
               </Title>
             </Flex>
-            <Flex justify="space-between">
-              <Title order={4}>Discount:</Title>
-              <Title order={4}>
-                $
-                <NumberFormatter
-                  thousandSeparator=","
-                  value={totals.discount}
-                />
-              </Title>
-            </Flex>
+
             <Divider variant="dotted" size={"md"} />
             <Flex justify="space-between">
               <Title order={4}>Subtotal:</Title>
               <Title order={4}>
                 $
-                <NumberFormatter
-                  thousandSeparator=","
-                  value={totals.total - totals.discount}
-                />
+                <NumberFormatter thousandSeparator="," value={totals.total} />
               </Title>
             </Flex>
           </Stack>
@@ -442,15 +430,15 @@ export default function SaleItemsTable(props: {
                     old.quantity + ""
                   );
                   if (quantity) {
-                    if (/^\d+$/.test(quantity)) {
+                    if (/^\d+(\.\d+)?$/.test(quantity)) {
                       form.setValue(
                         "saleItems",
                         watchItems.map((item, i) =>
                           i === selectedItem
                             ? {
                                 ...item,
-                                quantity: parseInt(quantity),
-                                total: item.price * parseInt(quantity),
+                                quantity: parseFloat(quantity),
+                                total: item.price * parseFloat(quantity),
                               }
                             : item
                         )
@@ -478,16 +466,16 @@ export default function SaleItemsTable(props: {
                 if (old) {
                   const price = prompt("Enter the price: ", old.price + "");
                   if (price) {
-                    if (/^-\d+$|^\d+$/.test(price)) {
+                    if (/^-?\d+(\.\d+)?$/.test(price)) {
                       form.setValue(
                         "saleItems",
                         watchItems.map((item, i) =>
                           i === selectedItem
                             ? {
                                 ...item,
-                                price: parseInt(price),
+                                price: parseFloat(price),
 
-                                total: item.price * parseInt(price),
+                                total: item.price * parseFloat(price),
                               }
                             : item
                         )

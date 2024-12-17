@@ -55,6 +55,19 @@ export default function MenuComponent() {
             >
               Items
             </Button>
+            <Button
+              fullWidth
+              leftSection={<IconTools />}
+              style={{
+                backgroundColor: "transparent",
+                display: "flex",
+              }}
+              onClick={() => {
+                push("/dashboard/items-needed");
+              }}
+            >
+              Item Needed
+            </Button>
             <Divider />
             <Button
               fullWidth

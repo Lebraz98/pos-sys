@@ -1,14 +1,7 @@
 "use client";
 import { deleteProduct } from "@/services/product-service";
-import type { Item, ItemNeeded, Product } from "@/types";
-import {
-  Box,
-  Flex,
-  LoadingOverlay,
-  MenuItem,
-  NumberFormatter,
-  Text,
-} from "@mantine/core";
+import type { Item, ItemNeeded } from "@/types";
+import { Box, Flex, LoadingOverlay, MenuItem, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconEdit, IconX } from "@tabler/icons-react";
 import {
@@ -18,11 +11,12 @@ import {
 } from "mantine-react-table";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useTransition } from "react";
-import ItemFrom from "../form/item-form";
+import ItemNeededFrom from "../form/item-needed-form";
+import { deleteItemNeeded } from "@/services/items-needed-service";
 
 export default function ItemsNeededTable(props: {
   data: ItemNeeded[];
-  products: Product[];
+  items: Item[];
 }) {
   const route = useRouter();
 
@@ -63,10 +57,10 @@ export default function ItemsNeededTable(props: {
         key={1}
         onClick={() => {
           setTranstions(() => {
-            deleteProduct(data.row.original.id).then((data) => {
+            deleteItemNeeded(data.row.original.id).then((data) => {
               if (data) {
                 notifications.show({
-                  message: "Needed Item has been deleted",
+                  message: data.message,
                   color: "red",
                 });
               }
@@ -89,7 +83,7 @@ export default function ItemsNeededTable(props: {
         }}
       >
         <Flex justify={"end"} mb={10}>
-          <ItemFrom products={props.products} />
+          <ItemNeededFrom items={props.items} />
         </Flex>
 
         <MantineReactTable table={table} />
@@ -110,6 +104,10 @@ const columns: MRT_ColumnDef<ItemNeeded>[] = [
   {
     accessorKey: "item.name",
     header: "Item  Name",
+  },
+  {
+    accessorKey: "note",
+    header: "Note",
   },
   {
     accessorKey: "item.product.name",
