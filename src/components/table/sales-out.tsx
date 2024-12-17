@@ -16,6 +16,7 @@ import {
   Select,
   Stack,
   Table,
+  TableScrollContainer,
   Textarea,
   TextInput,
   Title,
@@ -45,7 +46,7 @@ export default function SaleItemsTable(props: {
     resolver: zodResolver(SaleValidator),
     defaultValues: {
       saleItems: [],
-      status: "OPEN",
+      status: "open",
     },
   });
 
@@ -205,7 +206,7 @@ export default function SaleItemsTable(props: {
                 />
               )}
             />
-            <Button type="submit" mt={5} loading={isPeding}>
+            <Button type="submit" mt={5} loading={isPeding} fullWidth>
               Submit
             </Button>
           </Box>
@@ -297,7 +298,7 @@ export default function SaleItemsTable(props: {
             overflow: "auto",
           }}
         >
-          <ScrollArea>
+          <TableScrollContainer minWidth={"100%"}>
             <Table
               styles={{
                 td: {
@@ -321,7 +322,6 @@ export default function SaleItemsTable(props: {
                   <Table.Th>Sell per item</Table.Th>
                   <Table.Th>Price Before Discount</Table.Th>
                   <Table.Th>Price After Discount</Table.Th>
-                  <Table.Th>Loss</Table.Th>
                   <Table.Th>Win</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -365,28 +365,20 @@ export default function SaleItemsTable(props: {
                       />{" "}
                     </Table.Td>
 
-                    <Table.Td style={{ color: "red" }}>
+                    <Table.Td
+                      style={{
+                        width: 150,
+                        backgroundColor:
+                          value.price - items[value.itemId].buy > 0
+                            ? "green"
+                            : "red",
+                      }}
+                    >
                       $
                       <NumberFormatter
                         value={
-                          items[value.itemId].sell * value.quantity -
-                            value.price * value.quantity <
-                          0
-                            ? 0
-                            : items[value.itemId].sell * value.quantity -
-                              value.price * value.quantity
-                        }
-                        thousandSeparator=","
-                      />{" "}
-                    </Table.Td>
-                    <Table.Td style={{ color: "green" }}>
-                      $
-                      <NumberFormatter
-                        value={
-                          value.price > 0
-                            ? 0
-                            : value.price * value.quantity -
-                              items[value.itemId].buy * value.quantity
+                          value.price * value.quantity -
+                          items[value.itemId].buy * value.quantity
                         }
                         thousandSeparator=","
                       />{" "}
@@ -395,7 +387,7 @@ export default function SaleItemsTable(props: {
                 ))}
               </Table.Tbody>
             </Table>
-          </ScrollArea>
+          </TableScrollContainer>
         </Stack>
       </Stack>
 
@@ -415,6 +407,7 @@ export default function SaleItemsTable(props: {
         <Stack>
           <Flex justify={"space-between"} gap={3} style={{}}>
             <Button
+              disabled={selectedItem === -1}
               onClick={() => {
                 const item = watchItems[selectedItem];
                 if (selectedItem > -1 && item) {
@@ -440,6 +433,7 @@ export default function SaleItemsTable(props: {
               Remove
             </Button>
             <Button
+              disabled={selectedItem === -1}
               onClick={() => {
                 const old = watchItems[selectedItem];
                 if (old) {
@@ -478,6 +472,7 @@ export default function SaleItemsTable(props: {
               fullWidth
               leftSection={<IconMoneybag />}
               color="blue"
+              disabled={selectedItem === -1}
               onClick={() => {
                 const old = watchItems[selectedItem];
                 if (old) {
@@ -508,6 +503,7 @@ export default function SaleItemsTable(props: {
             </Button>
             <Button
               fullWidth
+              disabled={selectedItem === -1}
               leftSection={<IconNote />}
               color="green"
               onClick={() => {
@@ -534,12 +530,12 @@ export default function SaleItemsTable(props: {
           <Flex justify={"space-between"} gap={3} style={{}}>
             <Button
               fullWidth
-              color="gray"
+              color="green"
               style={{
                 height: "80px",
               }}
               onClick={() => {
-                form.setValue("type", "CASH");
+                form.setValue("type", "cash");
                 route.push("/dashboard?type=cash");
               }}
             >
@@ -547,18 +543,63 @@ export default function SaleItemsTable(props: {
             </Button>
             <Button
               onClick={() => {
-                form.setValue("type", "CREDIT");
+                form.setValue("type", "credit");
 
                 route.push("/dashboard?type=credit");
               }}
               fullWidth
-              color="gray"
+              color="blue"
               style={{
                 height: "80px",
               }}
             >
               Credit
             </Button>
+            <Button
+              onClick={() => {
+                form.setValue("type", "return");
+
+                route.push("/dashboard?type=retrun");
+              }}
+              fullWidth
+              color="orange"
+              style={{
+                height: "80px",
+              }}
+            >
+              Return
+            </Button>
+          </Flex>
+          <Flex gap={3}>
+            <Button
+              onClick={() => {
+                form.setValue("type", "waiting");
+
+                route.push("/dashboard?type=waiting");
+              }}
+              fullWidth
+              color="yellow"
+              style={{
+                height: "80px",
+              }}
+            >
+              Waiting
+            </Button>
+            <Button
+              onClick={() => {
+                form.setValue("type", "expensive");
+
+                route.push("/dashboard?type=expensive");
+              }}
+              fullWidth
+              color="red"
+              style={{
+                height: "80px",
+              }}
+            >
+              Expensive
+            </Button>
+            <div style={{ width: "100%" }}> </div>
           </Flex>
         </Stack>
         <Stack>

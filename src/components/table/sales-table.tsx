@@ -1,16 +1,18 @@
 "use client";
 import { deleteSale } from "@/services/sale-service";
+import type { Customer } from "@/types";
 import {
-  ActionIcon,
   Box,
   Button,
   Card,
   Divider,
   Flex,
   LoadingOverlay,
+  MenuItem,
   Modal,
   NumberFormatter,
   NumberInput,
+  Select,
   Table,
   TableScrollContainer,
   Text,
@@ -19,7 +21,7 @@ import {
 import { DateInput } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import type { Prisma } from "@prisma/client";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
   MantineReactTable,
@@ -45,16 +47,22 @@ export default function SalesTable(props: {
       salePayments: true;
     };
   }>[];
+  customers: Customer[];
 }) {
   const [date, setDate] = useState<Date[]>([
     dayjs().startOf("D").toDate(),
     dayjs().endOf("D").toDate(),
   ]);
+  const [selectedCustomer, setSelectedCustomer] = useState<string>();
+
   const data = useMemo(() => {
     return props.data.filter(
-      (sale) => sale.createdAt >= date[0] && sale.createdAt <= date[1]
+      (sale) =>
+        sale.createdAt >= date[0] &&
+        sale.createdAt <= date[1] &&
+        (!selectedCustomer || sale.customerId === +selectedCustomer)
     );
-  }, [date, props.data]);
+  }, [date, props.data, selectedCustomer]);
 
   const [isPeding, setTranstion] = useTransition();
 
@@ -139,48 +147,60 @@ export default function SalesTable(props: {
       );
     },
     enableRowActions: true,
-    renderRowActions(props) {
-      return (
-        <Flex gap={5}>
-          <ActionIcon
-            color="red"
-            onClick={() => {
-              const password = prompt(
-                "Enter your password to delete this sale"
-              );
-              if (!password) {
-                return;
-              }
-              if (password === "365272") {
-                if (confirm("Are you sure you want to delete this sale")) {
-                  setTranstion(() => {
-                    deleteSale(props.row.original.id);
-                    notifications.show({
-                      message: "Sale Deleted",
-                    });
-                  });
-                }
-              } else {
-                alert("Invalid Password");
-              }
-            }}
-          >
-            <IconX />
-          </ActionIcon>
-          <ActionIcon
-            onClick={() => {
-              route.push(
-                "/dashboard/sale-history?open=true&" +
-                  "id=" +
-                  props.row.original.id
-              );
-            }}
-          >
-            <IconPlus />{" "}
-          </ActionIcon>
-        </Flex>
-      );
-    },
+    renderRowActionMenuItems: (data) => [
+      <MenuItem
+        key={0}
+        color="red"
+        onClick={() => {
+          const password = prompt("Enter your password to delete this sale");
+          if (!password) {
+            return;
+          }
+          if (password === "365272") {
+            if (confirm("Are you sure you want to delete this sale")) {
+              setTranstion(() => {
+                deleteSale(data.row.original.id);
+                notifications.show({
+                  message: "Sale Deleted",
+                });
+              });
+            }
+          } else {
+            alert("Invalid Password");
+          }
+        }}
+      >
+        <IconX />
+      </MenuItem>,
+
+      data.row.original.type === "waiting" ? (
+        <MenuItem
+          key={2}
+          onClick={() => {
+            route.push(
+              "/dashboard/sale-history?open=true&" +
+                "id=" +
+                data.row.original.id
+            );
+          }}
+        >
+          <IconEdit />
+        </MenuItem>
+      ) : (
+        <MenuItem
+          key={1}
+          onClick={() => {
+            route.push(
+              "/dashboard/sale-history?open-edit=true&" +
+                "id=" +
+                data.row.original.id
+            );
+          }}
+        >
+          <IconPlus />{" "}
+        </MenuItem>
+      ),
+    ],
   });
 
   const searchParams = useSearchParams();
@@ -205,25 +225,48 @@ export default function SalesTable(props: {
   }, [selectedSale]);
 
   const amounts = useMemo(() => {
-    const cashIn = data.reduce(
-      (prev, cur) =>
-        cur.salePayments.reduce(
-          (prev, cur) => (cur.type === "CASH" ? cur.amount + prev : prev),
+    let cashIn = 0;
+    let credit = 0;
+    let unPaid = 0;
+    let expensive = 0;
+    let returns = 0;
+
+    data.forEach((sale) => {
+      if (sale.type === "cash") {
+        cashIn += sale.saleItems.reduce(
+          (prev, cur) => prev + cur.price * cur.quantity,
           0
-        ) + prev,
-      0
-    );
-    const credit = data.reduce(
-      (prev, cur) =>
-        cur.salePayments.reduce(
-          (prev, cur) => (cur.type === "CREDIT" ? cur.amount + prev : prev),
+        );
+      } else if (sale.type === "credit") {
+        credit += sale.salePayments.reduce((prev, cur) => prev + cur.amount, 0);
+        unPaid =
+          sale.saleItems.reduce(
+            (prev, cur) => prev + cur.price * cur.quantity,
+            0
+          ) - credit;
+      } else if (sale.type === "return") {
+        returns += sale.saleItems.reduce(
+          (prev, cur) => prev + cur.price * cur.quantity,
           0
-        ) + prev,
-      0
-    );
-    const total = cashIn + credit;
-    return { cashIn, credit, total };
+        );
+      } else if (sale.type === "expensive") {
+        expensive += sale.saleItems.reduce(
+          (prev, cur) => prev + cur.price * cur.quantity,
+          0
+        );
+      }
+    });
+
+    const total = cashIn + credit - returns - expensive - unPaid;
+    return { cashIn, credit, total, returns, unPaid, expensive };
   }, [data]);
+
+  const customers = useMemo(() => {
+    return props.customers.map((customer) => ({
+      value: customer.id.toString(),
+      label: customer.name,
+    }));
+  }, [props.customers]);
 
   return (
     <Box p={6}>
@@ -240,20 +283,48 @@ export default function SalesTable(props: {
             setDate([date[0], dayjs(e).endOf("D").toDate()]);
           }}
         />
+
+        <Select
+          data={customers}
+          placeholder="All"
+          searchable
+          clearable
+          value={selectedCustomer ?? ""}
+          onChange={(e) => {
+            setSelectedCustomer(e ?? undefined);
+          }}
+        />
       </Flex>
 
       <Flex justify={"space-around"} gap={5} mb={6}>
         <Card w={"100%"}>
-          <Title size={"lg"}>Cash In</Title>
+          <Title size={"lg"}>Income</Title>
           <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.cashIn} />
+            $
+            <NumberFormatter
+              thousandSeparator=","
+              value={amounts.cashIn + amounts.credit}
+            />
           </div>
         </Card>
 
         <Card w={"100%"}>
-          <Title size={"lg"}>Credit</Title>
+          <Title size={"lg"}>Unpaid</Title>
           <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.credit} />
+            $<NumberFormatter thousandSeparator="," value={amounts.unPaid} />
+          </div>
+        </Card>
+        <Card w={"100%"}>
+          <Title size={"lg"}>Expensive</Title>
+          <div>
+            $<NumberFormatter thousandSeparator="," value={amounts.expensive} />
+          </div>
+        </Card>
+
+        <Card w={"100%"}>
+          <Title size={"lg"}>Return</Title>
+          <div>
+            $<NumberFormatter thousandSeparator="," value={amounts.returns} />
           </div>
         </Card>
 
@@ -261,9 +332,10 @@ export default function SalesTable(props: {
           <Title size={"lg"}>Total</Title>
           <div>
             $<NumberFormatter thousandSeparator="," value={amounts.total} />
-          </div>{" "}
+          </div>
         </Card>
       </Flex>
+
       <Modal
         title={`Sale History ${selectedSale?.id} `}
         opened={searchParams.get("open") ? true : false}
@@ -273,7 +345,14 @@ export default function SalesTable(props: {
       >
         <Modal.Body>
           {remaining > 0 ? (
-            <Box component="form">
+            <Box
+              component="form"
+              display={"flex"}
+              style={{
+                gap: 5,
+                flexDirection: "column",
+              }}
+            >
               <Text>Invoice Id: {selectedSale?.invoiceId}</Text>
               <Text>For: {selectedSale?.customer.name}</Text>
               <Text>Created At: {selectedSale?.createdAt.toDateString()}</Text>
@@ -288,6 +367,17 @@ export default function SalesTable(props: {
           ) : (
             <Text>Already Paid</Text>
           )}
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        opened={searchParams.get("open-edit") ? true : false}
+        onClose={() => {
+          route.replace("/dashboard/sale-history");
+        }}
+      >
+        <Modal.Body>
+          <Text>Modal body</Text>
         </Modal.Body>
       </Modal>
       <MantineReactTable table={table} />

@@ -39,7 +39,7 @@ export async function createSale(data: SaleValidator) {
       invoiceId: data.invoiceId,
       note: data.note,
 
-      status: data.type === "CASH" ? "CLOSE" : "OPEN",
+      status: data.type === "cash" ? "CLOSE" : "open",
       type: data.type,
       saleItems: {
         createMany: {
@@ -55,14 +55,14 @@ export async function createSale(data: SaleValidator) {
     },
   });
 
-  if (result.type === "CASH") {
+  if (result.type === "cash") {
     await prisma.salePayment.create({
       data: {
         amount: data.saleItems.reduce(
           (prev, cur) => cur.price * cur.quantity + prev,
           0
         ),
-        type: "CASH",
+        type: "cash",
         saleId: result.id,
       },
     });

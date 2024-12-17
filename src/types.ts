@@ -50,4 +50,14 @@ type SalePayment = Prisma.SalePaymentGetPayload<{
     sale: true;
   };
 }>;
-export type { Item, Product, Customer, Sale, SalePayment };
+type ItemNeeded = Prisma.ItemNeededGetPayload<{
+  include: {
+    item: {
+      include: {
+        product: true;
+      };
+    };
+  };
+}>;
+
+export type { Item, Product, Customer, Sale, SalePayment, ItemNeeded };

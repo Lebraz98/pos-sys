@@ -1,12 +1,13 @@
 "use client";
 import { deleteProduct } from "@/services/product-service";
-import type { Item, Product } from "@/types";
+import type { Item, ItemNeeded, Product } from "@/types";
 import {
   Box,
   Flex,
   LoadingOverlay,
   MenuItem,
   NumberFormatter,
+  Text,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconEdit, IconX } from "@tabler/icons-react";
@@ -19,8 +20,8 @@ import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useTransition } from "react";
 import ItemFrom from "../form/item-form";
 
-export default function ItemTable(props: {
-  data: Item[];
+export default function ItemsNeededTable(props: {
+  data: ItemNeeded[];
   products: Product[];
 }) {
   const route = useRouter();
@@ -29,7 +30,7 @@ export default function ItemTable(props: {
 
   const onEdit = useCallback(
     (id: number) => {
-      route.push("/dashboard/items?open=true&id=" + id);
+      route.push("/dashboard/items-needed?open=true&id=" + id);
     },
     [route]
   );
@@ -43,6 +44,9 @@ export default function ItemTable(props: {
 
     mantineLoadingOverlayProps: {
       visible: isPending,
+    },
+    renderDetailPanel(props) {
+      return <Text>{props.row.original.note}</Text>;
     },
     enableRowActions: true,
     renderRowActionMenuItems: (data) => [
@@ -62,7 +66,7 @@ export default function ItemTable(props: {
             deleteProduct(data.row.original.id).then((data) => {
               if (data) {
                 notifications.show({
-                  message: "Item has been deleted",
+                  message: "Needed Item has been deleted",
                   color: "red",
                 });
               }
@@ -93,65 +97,22 @@ export default function ItemTable(props: {
     </Suspense>
   );
 }
-const columns: MRT_ColumnDef<Item>[] = [
+const columns: MRT_ColumnDef<ItemNeeded>[] = [
   {
-    accessorKey: "serialNumber",
+    accessorKey: "item.serialNumber",
     header: "Serial Number",
   },
   {
-    accessorKey: "name",
-    header: "Name",
+    accessorKey: "quantity",
+    header: "Quantity",
+  },
+
+  {
+    accessorKey: "item.name",
+    header: "Item  Name",
   },
   {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "product.name",
+    accessorKey: "item.product.name",
     header: "Product Name",
-  },
-  {
-    accessorKey: "buy",
-    header: "Buy",
-    Cell(props) {
-      return (
-        <span style={{ color: "red" }}>
-          $
-          <NumberFormatter value={props.row.original.buy} thousandSeparator />
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "sell",
-    header: "Sell",
-    Cell(props) {
-      return (
-        <span style={{ color: "green" }}>
-          $
-          <NumberFormatter
-            value={props.row.original.sell}
-            thousandSeparator=","
-          />
-        </span>
-      );
-    },
-  },
-  {
-    header: "Win",
-    accessorFn(originalRow) {
-      return originalRow.sell - originalRow.buy;
-    },
-    Cell(props) {
-      return (
-        <span style={{ color: "orange" }}>
-          $
-          <NumberFormatter
-            value={props.row.original.sell - props.row.original.buy}
-            thousandSeparator=","
-          />
-        </span>
-      );
-    },
   },
 ];
