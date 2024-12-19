@@ -1,5 +1,5 @@
 "use client";
-import { deleteProduct } from "@/services/product-service";
+import { deleteCustomer } from "@/services/customer-service";
 import type { Customer } from "@/types";
 import { Box, Flex, LoadingOverlay, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -12,7 +12,6 @@ import {
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useTransition } from "react";
 import CustomerFrom from "../form/customer-form";
-import { deleteCustomer } from "@/services/customer-service";
 
 export default function CustomerTable(props: { data: Customer[] }) {
   const route = useRouter();

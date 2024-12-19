@@ -7,7 +7,7 @@ export default async function page() {
   const customers = await getCustomers();
   return (
     <Suspense fallback={<LoadingOverlay visible />}>
-      <CustomerTable data={customers} />
+      <CustomerTable data={customers as any} />
     </Suspense>
   );
 }
