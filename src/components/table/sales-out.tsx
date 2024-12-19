@@ -17,6 +17,7 @@ import {
   Stack,
   Table,
   TableScrollContainer,
+  Text,
   Textarea,
   TextInput,
   Title,
@@ -240,6 +241,11 @@ export default function SaleItemsTable(props: {
             }}
           >
             <List p={5}>
+              {itemSearchResult.length === 0 && search !== "" && (
+                <div>
+                  <Text>Result Not Found</Text>
+                </div>
+              )}
               {itemSearchResult.map((item) => (
                 <div key={item.id}>
                   <List.Item

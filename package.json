@@ -42,6 +42,7 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-hook-form": "^7.53.2",
+    "react-qr-barcode-scanner": "^2.0.0",
     "recharts": "2",
     "zod": "^3.23.8"
   },

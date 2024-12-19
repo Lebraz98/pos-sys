@@ -200,19 +200,6 @@ export default function ItemFrom(props: { products: Product[] }) {
               />
 
               <Controller
-                name={"serialNumber"}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextInput
-                    error={fieldState.error?.message}
-                    label="Serial Number"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-
-              <Controller
                 name={"description"}
                 control={control}
                 render={({ field, fieldState }) => (
@@ -224,7 +211,18 @@ export default function ItemFrom(props: { products: Product[] }) {
                   />
                 )}
               />
-
+              <Controller
+                name={"serialNumber"}
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextInput
+                    error={fieldState.error?.message}
+                    label="Serial Number"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
               <Button type="submit" loading={isPending}>
                 Save
               </Button>

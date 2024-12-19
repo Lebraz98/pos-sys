@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useTransition } from "react";
 import CustomerFrom from "../form/customer-form";
+import { deleteCustomer } from "@/services/customer-service";
 
 export default function CustomerTable(props: { data: Customer[] }) {
   const route = useRouter();
@@ -50,10 +51,10 @@ export default function CustomerTable(props: { data: Customer[] }) {
         key={1}
         onClick={() => {
           setTranstions(() => {
-            deleteProduct(data.row.original.id).then((data) => {
+            deleteCustomer(data.row.original.id).then((data) => {
               if (data) {
                 notifications.show({
-                  message: "Product has been deleted",
+                  message: data.message,
                   color: "red",
                 });
               }

@@ -93,6 +93,9 @@ export async function updateItem(id: number, data: ItemValidator) {
       name: data.name,
       serialNumber: data.serialNumber,
       description: data.description,
+      buy: data.buy,
+      sell: data.sell,
+      productId: data.productId,
     },
   });
 
