@@ -9,7 +9,7 @@ export default async function page() {
   return (
     <div style={{ height: "100%" }}>
       <Suspense fallback={<div>Loading...</div>}>
-        <SaleItemsTable items={items} customers={customers} />
+        <SaleItemsTable items={items} customers={customers as any} />
       </Suspense>
     </div>
   );
