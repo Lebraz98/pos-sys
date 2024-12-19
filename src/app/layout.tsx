@@ -36,7 +36,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <MantineProvider>
+        <MantineProvider defaultColorScheme="dark">
           <Notifications />
           {children}
         </MantineProvider>
