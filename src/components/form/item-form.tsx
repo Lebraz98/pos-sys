@@ -41,6 +41,7 @@ export default function ItemFrom(props: { products: Product[] }) {
   const id = params.get("id");
   const [isPending, setTranstions] = useTransition();
   useEffect(() => {
+    reset();
     if (id) {
       if (id !== "new") {
         setTranstions(() => {
@@ -55,24 +56,8 @@ export default function ItemFrom(props: { products: Product[] }) {
         });
       }
     }
-  }, [id, setValue]);
+  }, [id, reset, setValue]);
 
-  useEffect(() => {
-    if (id) {
-      if (id !== "new") {
-        setTranstions(() => {
-          getItem(+id).then((data) => {
-            if (data) {
-              Object.keys(data).forEach((key) => {
-                const keyData = key as keyof Item;
-                setValue(key as any, data[keyData] as unknown as string);
-              });
-            }
-          });
-        });
-      }
-    }
-  }, [id, setValue]);
   const onSubmit = useCallback(
     (data: ItemValidator) => {
       setTranstions(() => {
