@@ -35,6 +35,7 @@ type Sale = Prisma.SaleGetPayload<{
     salePayments: true;
     saleItems: {
       include: {
+        rate: true;
         item: {
           include: {
             product: true;
@@ -59,5 +60,6 @@ type ItemNeeded = Prisma.ItemNeededGetPayload<{
     };
   };
 }>;
+type Rate = Prisma.RateGetPayload<undefined>;
 
-export type { Item, Product, Customer, Sale, SalePayment, ItemNeeded };
+export type { Item, Product, Customer, Sale, SalePayment, ItemNeeded, Rate };

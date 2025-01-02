@@ -2,11 +2,14 @@
 import { Button, Divider, Drawer, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconCurrency,
+  IconDevicesDollar,
   IconDots,
   IconFiles,
   IconHistory,
   IconTools,
   IconUser,
+  IconUserDollar,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
@@ -90,10 +93,23 @@ export default function MenuComponent() {
                 display: "flex",
               }}
               onClick={() => {
-                push("/dashboard/customers");
+                push("/dashboard/rates");
               }}
             >
               Customers{" "}
+            </Button>
+            <Button
+              fullWidth
+              leftSection={<IconDevicesDollar />}
+              style={{
+                backgroundColor: "transparent",
+                display: "flex",
+              }}
+              onClick={() => {
+                push("/dashboard/rates");
+              }}
+            >
+              Rate{" "}
             </Button>
           </Stack>
         </Drawer.Body>

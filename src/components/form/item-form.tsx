@@ -144,6 +144,7 @@ export default function ItemFrom(props: { products: Product[] }) {
                     value={field.value}
                     onChange={field.onChange}
                     withAsterisk
+                    thousandSeparator
                   />
                 )}
               />
@@ -157,6 +158,7 @@ export default function ItemFrom(props: { products: Product[] }) {
                     value={field.value}
                     onChange={field.onChange}
                     withAsterisk
+                    thousandSeparator
                   />
                 )}
               />

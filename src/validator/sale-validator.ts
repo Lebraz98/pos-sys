@@ -6,7 +6,7 @@ const SaleValidator = z.object({
   type: z.string(),
   status: z.string(),
   invoiceId: z.string().optional().nullable(),
-  customerId: z.number(),
+  customerId: z.number().optional().nullable(),
   note: z.string().optional().nullable(),
 });
 type SaleValidator = z.infer<typeof SaleValidator>;

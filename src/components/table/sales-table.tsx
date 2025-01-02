@@ -37,6 +37,7 @@ export default function SalesTable(props: {
       customer: true;
       saleItems: {
         include: {
+          rate: true;
           item: {
             include: {
               product: true;
@@ -79,6 +80,7 @@ export default function SalesTable(props: {
         (prev, cur) => cur.amount + prev,
         0
       );
+      const rate = props.row.original.saleItems[0].rate?.value ?? 1;
       return (
         <Box>
           <LoadingOverlay visible={isPending} />
@@ -102,7 +104,10 @@ export default function SalesTable(props: {
               Total: $
               <NumberFormatter value={total - totalPaid} />
             </Text>
-
+            <Text>
+              Total: ل.ل
+              <NumberFormatter value={Math.ceil(total - totalPaid) * rate} />
+            </Text>
             <Text>Status: {total - totalPaid === 0 ? "Paid" : "Unpaid"}</Text>
           </Box>
 
@@ -119,6 +124,7 @@ export default function SalesTable(props: {
                   <Table.Th>Quantity</Table.Th>
                   <Table.Th>Price</Table.Th>
                   <Table.Th>Total</Table.Th>
+                  <Table.Th>Total ل.ل</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -141,6 +147,13 @@ export default function SalesTable(props: {
                       $
                       <NumberFormatter
                         value={saleItem.total}
+                        thousandSeparator=","
+                      />
+                    </Table.Td>
+                    <Table.Td>
+                      ل.ل
+                      <NumberFormatter
+                        value={saleItem.total * rate}
                         thousandSeparator=","
                       />
                     </Table.Td>
@@ -392,16 +405,21 @@ export default function SalesTable(props: {
               }}
             >
               <Text>Invoice Id: {selectedSale?.invoiceId}</Text>
-              <Text>For: {selectedSale?.customer.name}</Text>
+              <Text>For: {selectedSale?.customer?.name}</Text>
               <Text>Created At: {selectedSale?.createdAt.toDateString()}</Text>
               <Text>Note: {selectedSale?.note}</Text>
               <Text>
                 Remaining: $
                 <NumberFormatter value={remaining} />
               </Text>
+              <Text>
+                Remaining: ل.ل
+                <NumberFormatter value={remaining} />
+              </Text>
               <NumberInput
                 label="Paid"
                 min={0}
+                thousandSeparator
                 max={remaining}
                 value={amount}
                 onChange={(e) => {
@@ -428,6 +446,7 @@ const columns: MRT_ColumnDef<
       customer: true;
       saleItems: {
         include: {
+          rate: true;
           item: { include: { product: true } };
         };
       };
@@ -474,6 +493,28 @@ const columns: MRT_ColumnDef<
     },
     accessorKey: "saleItems.total",
     header: "Total",
+  },
+  {
+    accessorFn(originalRow) {
+      const total = originalRow.saleItems.reduce(
+        (prev, cur) => cur.price * cur.quantity + prev,
+        0
+      );
+      const rate = originalRow.saleItems[0].rate?.value ?? 1;
+      return (
+        <div>
+          ل.ل
+          <NumberFormatter
+            value={Math.ceil(total * rate)}
+            thousandSeparator=","
+          />
+        </div>
+      );
+    },
+
+    id: "total_id",
+    accessorKey: "saleItems.total",
+    header: "Total ل.ل",
   },
   {
     accessorFn(originalRow) {

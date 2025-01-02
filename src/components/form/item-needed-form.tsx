@@ -156,6 +156,7 @@ export default function ItemNeededFrom(props: { items: Item[] }) {
                     value={field.value}
                     onChange={field.onChange}
                     withAsterisk
+                    thousandSeparator
                   />
                 )}
               />

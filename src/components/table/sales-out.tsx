@@ -12,7 +12,6 @@ import {
   List,
   Modal,
   NumberFormatter,
-  ScrollArea,
   Select,
   Stack,
   Table,
@@ -38,6 +37,7 @@ import MenuComponent from "../layout/menu-component";
 export default function SaleItemsTable(props: {
   items: Item[];
   customers: Customer[];
+  rate?: number;
 }) {
   const searchQuery = useSearchParams();
 
@@ -266,21 +266,39 @@ export default function SaleItemsTable(props: {
             </List>
           </Box>
         </Box>
-        <Card shadow="xs" padding="xl" radius="0" withBorder h={340}>
+        <Card shadow="xs" padding="xl" radius="0" withBorder h={440}>
           <Stack h={"100%"}>
             <Flex justify="space-between">
-              <Title order={4}>Total:</Title>
+              <Title order={4}>Total Items:</Title>
+              <Title order={4}>{watchItems.length}</Title>
+            </Flex>
+            <Flex justify="space-between">
+              <Title order={4}>Rate ل.ل:</Title>
               <Title order={4}>
-                $<NumberFormatter thousandSeparator="," value={totals.total} />
+                ل.ل
+                <NumberFormatter
+                  thousandSeparator=","
+                  value={props.rate ?? 1}
+                />
+              </Title>
+            </Flex>
+            <Flex justify="space-between">
+              <Title order={4}>Total In $:</Title>
+              <Title order={4}>
+                $
+                <NumberFormatter thousandSeparator="," value={totals.total} />
               </Title>
             </Flex>
 
             <Divider variant="dotted" size={"md"} />
             <Flex justify="space-between">
-              <Title order={4}>Subtotal:</Title>
+              <Title order={4}>Total In L.L:</Title>
               <Title order={4}>
-                $
-                <NumberFormatter thousandSeparator="," value={totals.total} />
+                ل.ل{" "}
+                <NumberFormatter
+                  thousandSeparator=","
+                  value={Math.ceil(totals.total * (props.rate ?? 1))}
+                />
               </Title>
             </Flex>
           </Stack>
@@ -316,6 +334,8 @@ export default function SaleItemsTable(props: {
                   <Table.Th>Sell per item</Table.Th>
                   <Table.Th>Price Before Discount</Table.Th>
                   <Table.Th>Price After Discount</Table.Th>
+                  <Table.Th>Price After Discount ل.ل</Table.Th>
+
                   <Table.Th>Win</Table.Th>
                 </Table.Tr>
               </Table.Thead>
@@ -355,6 +375,15 @@ export default function SaleItemsTable(props: {
                       $
                       <NumberFormatter
                         value={value.price * value.quantity}
+                        thousandSeparator=","
+                      />{" "}
+                    </Table.Td>
+                    <Table.Td style={{ backgroundColor: "green" }}>
+                      ل.ل
+                      <NumberFormatter
+                        value={Math.ceil(
+                          value.price * value.quantity * (props.rate ?? 1)
+                        )}
                         thousandSeparator=","
                       />{" "}
                     </Table.Td>

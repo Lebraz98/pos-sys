@@ -2,7 +2,6 @@
 
 import prisma from "@/prisma/prisma";
 import type ProductValidator from "@/validator/product-validator";
-import type { Product } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function getProducts() {

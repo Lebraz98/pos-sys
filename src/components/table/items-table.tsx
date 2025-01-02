@@ -1,5 +1,5 @@
 "use client";
-import { deleteProduct } from "@/services/product-service";
+import { deleteItem } from "@/services/item-service";
 import type { Item, Product } from "@/types";
 import {
   Box,
@@ -16,12 +16,12 @@ import {
   type MRT_ColumnDef,
 } from "mantine-react-table";
 import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useTransition } from "react";
+import { Suspense, useCallback, useMemo, useTransition } from "react";
 import ItemFrom from "../form/item-form";
-import { deleteItem } from "@/services/item-service";
 
 export default function ItemTable(props: {
   data: Item[];
+  rate: number;
   products: Product[];
 }) {
   const route = useRouter();
@@ -33,6 +33,89 @@ export default function ItemTable(props: {
       route.push("/dashboard/items?open=true&id=" + id);
     },
     [route]
+  );
+  const columns: MRT_ColumnDef<Item>[] = useMemo(
+    () => [
+      {
+        accessorKey: "serialNumber",
+        header: "Serial Number",
+      },
+      {
+        accessorKey: "name",
+        header: "Name",
+      },
+      {
+        accessorKey: "description",
+        header: "Description",
+      },
+      {
+        accessorKey: "product.name",
+        header: "Product Name",
+      },
+      {
+        accessorKey: "buy",
+        header: "Buy",
+        Cell(props) {
+          return (
+            <span style={{ color: "red" }}>
+              $
+              <NumberFormatter
+                value={props.row.original.buy}
+                thousandSeparator
+              />
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "sell",
+        header: "Sell",
+        Cell(props) {
+          return (
+            <span style={{ color: "green" }}>
+              $
+              <NumberFormatter
+                value={props.row.original.sell}
+                thousandSeparator=","
+              />
+            </span>
+          );
+        },
+      },
+      {
+        id: "sell-lbp",
+        header: "Sell in ل.ل",
+        Cell(data) {
+          return (
+            <span style={{ color: "green" }}>
+              ل.ل
+              <NumberFormatter
+                value={data.row.original.sell * +props.rate}
+                thousandSeparator=","
+              />
+            </span>
+          );
+        },
+      },
+      {
+        header: "Win",
+        accessorFn(originalRow) {
+          return originalRow.sell - originalRow.buy;
+        },
+        Cell(props) {
+          return (
+            <span style={{ color: "orange" }}>
+              $
+              <NumberFormatter
+                value={props.row.original.sell - props.row.original.buy}
+                thousandSeparator=","
+              />
+            </span>
+          );
+        },
+      },
+    ],
+    [props.rate]
   );
   const table = useMantineReactTable({
     columns,
@@ -94,65 +177,3 @@ export default function ItemTable(props: {
     </Suspense>
   );
 }
-const columns: MRT_ColumnDef<Item>[] = [
-  {
-    accessorKey: "serialNumber",
-    header: "Serial Number",
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "product.name",
-    header: "Product Name",
-  },
-  {
-    accessorKey: "buy",
-    header: "Buy",
-    Cell(props) {
-      return (
-        <span style={{ color: "red" }}>
-          $
-          <NumberFormatter value={props.row.original.buy} thousandSeparator />
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "sell",
-    header: "Sell",
-    Cell(props) {
-      return (
-        <span style={{ color: "green" }}>
-          $
-          <NumberFormatter
-            value={props.row.original.sell}
-            thousandSeparator=","
-          />
-        </span>
-      );
-    },
-  },
-  {
-    header: "Win",
-    accessorFn(originalRow) {
-      return originalRow.sell - originalRow.buy;
-    },
-    Cell(props) {
-      return (
-        <span style={{ color: "orange" }}>
-          $
-          <NumberFormatter
-            value={props.row.original.sell - props.row.original.buy}
-            thousandSeparator=","
-          />
-        </span>
-      );
-    },
-  },
-];

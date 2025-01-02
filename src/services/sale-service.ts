@@ -3,6 +3,7 @@
 import prisma from "@/prisma/prisma";
 import type SaleValidator from "@/validator/sale-validator";
 import { revalidatePath } from "next/cache";
+import { getLastRate } from "./rate-service";
 
 export async function getSales() {
   return prisma.sale.findMany({
@@ -13,6 +14,7 @@ export async function getSales() {
       customer: true,
       saleItems: {
         include: {
+          rate: true,
           item: {
             include: {
               product: true,
@@ -33,13 +35,15 @@ export async function getSale(id: number) {
 }
 
 export async function createSale(data: SaleValidator) {
+  const rate = getLastRate();
+
   const result = await prisma.sale.create({
     data: {
       customerId: data.customerId,
       invoiceId: data.invoiceId,
       note: data.note,
 
-      status: data.type === "cash" ? "CLOSE" : "open",
+      status: data.type === "cash" ? "close" : "open",
       type: data.type,
       saleItems: {
         createMany: {
@@ -48,6 +52,7 @@ export async function createSale(data: SaleValidator) {
             price: res.price,
             quantity: res.quantity,
             total: res.price * res.quantity,
+            rateId: rate[0]?.value,
             note: res.note,
           })),
         },
@@ -112,7 +117,7 @@ export async function updateSalePayments(id: number, paid: number) {
         id: id,
       },
       data: {
-        status: "CLOSE",
+        status: "close",
       },
     });
   }

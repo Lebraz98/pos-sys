@@ -62,8 +62,8 @@ model Sale {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   saleItems    SaleItem[]
-  customerId   Int
-  customer     Customer      @relation(fields: [customerId], references: [id])
+  customerId   Int?
+  customer     Customer?     @relation(fields: [customerId], references: [id])
   type         String        @default("cash")
   salePayments SalePayment[]
   status       String        @default("open")
@@ -96,6 +96,8 @@ model SaleItem {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   item           Item?     @relation(fields: [itemId], references: [id])
+  rateId         Int?
+  rate           Rate?     @relation(fields: [rateId], references: [id])
 }
 
 model Expense {
@@ -106,4 +108,12 @@ model Expense {
   amount     Float
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+}
+
+model Rate {
+  id        Int        @id @default(autoincrement())
+  value     Float
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  saleItems SaleItem[]
 }
