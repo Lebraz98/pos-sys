@@ -93,7 +93,7 @@ export default function MenuComponent() {
                 display: "flex",
               }}
               onClick={() => {
-                push("/dashboard/rates");
+                push("/dashboard/customers");
               }}
             >
               Customers{" "}
