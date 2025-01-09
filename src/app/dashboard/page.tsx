@@ -9,6 +9,7 @@ export default async function page() {
 
   const customers = await getCustomers();
   const rate = await getLastRate();
+
   return (
     <div style={{ height: "100%" }}>
       <Suspense fallback={<div>Loading...</div>}>

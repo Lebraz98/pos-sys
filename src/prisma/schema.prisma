@@ -19,6 +19,7 @@ model Customer {
   updatedAt DateTime  @updatedAt
   sales     Sale[]
   expenses  Expense[]
+  invoices  Invoice[]
 }
 
 model Product {
@@ -69,6 +70,7 @@ model Sale {
   status       String        @default("open")
   invoiceId    String?
   note         String?
+  total        Float         @default(0)
 }
 
 model SalePayment {
@@ -116,4 +118,33 @@ model Rate {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   saleItems SaleItem[]
+  invoices  Invoice[]
+}
+
+model Invoice {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  note        String?
+  type        String    @default("debit")
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  amount      Float
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  payments    Payment[]
+  rateId      Int?
+  rate        Rate?     @relation(fields: [rateId], references: [id])
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  note      String?
+  amount    Float
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId Int?
 }

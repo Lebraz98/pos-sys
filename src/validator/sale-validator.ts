@@ -8,6 +8,8 @@ const SaleValidator = z.object({
   invoiceId: z.string().optional().nullable(),
   customerId: z.number().optional().nullable(),
   note: z.string().optional().nullable(),
+  paid: z.number().optional().nullable(),
+  total: z.number().optional().nullable(),
 });
 type SaleValidator = z.infer<typeof SaleValidator>;
 export default SaleValidator;

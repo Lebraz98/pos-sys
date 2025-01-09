@@ -120,9 +120,12 @@ export default function ItemTable(props: {
   const table = useMantineReactTable({
     columns,
     data: props.data,
-    enablePagination: false,
     initialState: {
       showColumnFilters: true,
+      pagination: {
+        pageSize: 100,
+        pageIndex: 0,
+      },
     },
 
     mantineLoadingOverlayProps: {

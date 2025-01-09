@@ -5,7 +5,11 @@ import type SaleValidator from "@/validator/sale-validator";
 import { revalidatePath } from "next/cache";
 import { getLastRate } from "./rate-service";
 
-export async function getSales() {
+export async function getSales(props?: {
+  fromDate?: Date;
+  toDate?: Date;
+  customerId?: number;
+}) {
   return prisma.sale.findMany({
     orderBy: {
       id: "desc",
@@ -24,6 +28,13 @@ export async function getSales() {
       },
       salePayments: true,
     },
+    where: {
+      createdAt: {
+        gte: props?.fromDate,
+        lte: props?.toDate,
+      },
+      customerId: props?.customerId,
+    },
   });
 }
 export async function getSale(id: number) {
@@ -36,12 +47,15 @@ export async function getSale(id: number) {
 
 export async function createSale(data: SaleValidator) {
   const rate = getLastRate();
-
+  const total =
+    data.total ??
+    data.saleItems.reduce((prev, cur) => cur.price * cur.quantity + prev, 0);
   const result = await prisma.sale.create({
     data: {
       customerId: data.customerId,
       invoiceId: data.invoiceId,
       note: data.note,
+      total: total,
 
       status: data.type === "cash" ? "close" : "open",
       type: data.type,
@@ -71,11 +85,45 @@ export async function createSale(data: SaleValidator) {
         saleId: result.id,
       },
     });
+  } else if (data.paid) {
+    const m = await prisma.salePayment.create({
+      data: {
+        amount: data.paid,
+        type: "cash",
+        saleId: result.id,
+      },
+    });
+    if (
+      m.amount ===
+      data.saleItems.reduce((prev, cur) => cur.price * cur.quantity + prev, 0)
+    ) {
+      await prisma.sale.update({
+        where: {
+          id: result.id,
+        },
+        data: {
+          status: "close",
+        },
+      });
+    }
   }
 
   revalidatePath("/dashboard", "layout");
   return {
     message: "Sale created successfully",
+  };
+}
+export async function closeSale(id: number) {
+  await prisma.sale.update({
+    where: {
+      id: id,
+    },
+    data: {
+      status: "close",
+    },
+  });
+  return {
+    message: "Sale closed successfully",
   };
 }
 

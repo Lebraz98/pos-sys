@@ -12,6 +12,7 @@ import {
   List,
   Modal,
   NumberFormatter,
+  NumberInput,
   Select,
   Stack,
   Table,
@@ -109,7 +110,6 @@ export default function SaleItemsTable(props: {
   const totals = useMemo(() => {
     return watchItems.reduce(
       (acc, cur) => {
-        const item = items[cur.itemId];
         if (cur) {
           acc.total += cur.price * cur.quantity;
           acc.discount += cur.price * cur.quantity - acc.total;
@@ -121,7 +121,12 @@ export default function SaleItemsTable(props: {
         total: 0,
       }
     );
-  }, [items, watchItems]);
+  }, [watchItems]);
+
+  useMemo(() => {
+    form.setValue("total", totals.total);
+  }, [form, totals.total]);
+
   const onSelect = useCallback((i: number) => setSelectedItem(i), []);
 
   const customers = useMemo(
@@ -182,6 +187,23 @@ export default function SaleItemsTable(props: {
                 />
               )}
             />
+            {form.watch("type") === "credit" && (
+              <Controller
+                name="paid"
+                control={form.control}
+                render={({ field }) => (
+                  <NumberInput
+                    value={field.value ?? 0}
+                    min={0}
+                    max={totals.total}
+                    label="Paid"
+                    onChange={(value) => {
+                      field.onChange(value);
+                    }}
+                  />
+                )}
+              />
+            )}
             <Controller
               name="invoiceId"
               control={form.control}
@@ -207,6 +229,18 @@ export default function SaleItemsTable(props: {
                 />
               )}
             />
+            <Controller
+              name="total"
+              control={form.control}
+              render={({ field }) => (
+                <NumberInput
+                  label="Total"
+                  dir="auto"
+                  onChange={field.onChange}
+                  value={field.value as number}
+                />
+              )}
+            />
             <Button type="submit" mt={5} loading={isPeding} fullWidth>
               Submit
             </Button>
@@ -215,98 +249,65 @@ export default function SaleItemsTable(props: {
       </Modal>
 
       <Stack flex={1}>
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (itemSearchResult.length > 0) {
-              addItem(itemSearchResult[0]);
-            }
-          }}
-        >
-          <TextInput
-            value={search}
-            placeholder="Search for item"
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-          />
+        <Flex w={"100%"} gap={5}>
           <Box
-            style={{
-              zIndex: 100,
-              border: "1px solid #000",
-              width: "auto",
-              height: "200px",
-              overflow: "auto",
+            w={"100%"}
+            component="form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (itemSearchResult.length > 0) {
+                addItem(itemSearchResult[0]);
+              }
             }}
           >
-            <List p={5}>
-              {itemSearchResult.length === 0 && search !== "" && (
-                <div>
-                  <Text>Result Not Found</Text>
-                </div>
-              )}
-              {itemSearchResult.map((item) => (
-                <div key={item.id}>
-                  <List.Item
-                    onClick={() => {
-                      addItem(item);
-                      setSelectedItem(watchItems.length + 1);
-                    }}
-                    style={{ cursor: "pointer", fontSize: 20 }}
-                    bg={"gray"}
-                    p={5}
-                  >
-                    ({item.serialNumber}) {item.name} - $
-                    <NumberFormatter value={item.sell} />
-                  </List.Item>
-                  <Divider />
-                </div>
-              ))}
-            </List>
+            <TextInput
+              value={search}
+              placeholder="Search for item"
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
+            <Box
+              style={{
+                zIndex: 100,
+                border: "1px solid #000",
+                width: "auto",
+                height: "200px",
+                overflow: "auto",
+              }}
+            >
+              <List p={5}>
+                {itemSearchResult.length === 0 && search !== "" && (
+                  <div>
+                    <Text>Result Not Found</Text>
+                  </div>
+                )}
+                {itemSearchResult.map((item) => (
+                  <div key={item.id}>
+                    <List.Item
+                      onClick={() => {
+                        addItem(item);
+                        setSelectedItem(watchItems.length + 1);
+                      }}
+                      style={{ cursor: "pointer", fontSize: 20 }}
+                      bg={"gray"}
+                      p={5}
+                    >
+                      ({item.serialNumber}) {item.name} - $
+                      <NumberFormatter value={item.sell} />
+                    </List.Item>
+                    <Divider />
+                  </div>
+                ))}
+              </List>
+            </Box>
           </Box>
-        </Box>
-        <Card shadow="xs" padding="xl" radius="0" withBorder h={440}>
-          <Stack h={"100%"}>
-            <Flex justify="space-between">
-              <Title order={4}>Total Items:</Title>
-              <Title order={4}>{watchItems.length}</Title>
-            </Flex>
-            <Flex justify="space-between">
-              <Title order={4}>Rate ل.ل:</Title>
-              <Title order={4}>
-                ل.ل
-                <NumberFormatter
-                  thousandSeparator=","
-                  value={props.rate ?? 1}
-                />
-              </Title>
-            </Flex>
-            <Flex justify="space-between">
-              <Title order={4}>Total In $:</Title>
-              <Title order={4}>
-                $
-                <NumberFormatter thousandSeparator="," value={totals.total} />
-              </Title>
-            </Flex>
-
-            <Divider variant="dotted" size={"md"} />
-            <Flex justify="space-between">
-              <Title order={4}>Total In L.L:</Title>
-              <Title order={4}>
-                ل.ل{" "}
-                <NumberFormatter
-                  thousandSeparator=","
-                  value={Math.ceil(totals.total * (props.rate ?? 1))}
-                />
-              </Title>
-            </Flex>
-          </Stack>
-        </Card>
+        </Flex>
         <Stack
           style={{
             maxHeight: "calc(100vh - 340px)",
             height: "100%",
+            width: "100%",
             overflow: "auto",
           }}
         >
@@ -322,7 +323,6 @@ export default function SaleItemsTable(props: {
               stickyHeader
               captionSide="top"
             >
-              <Table.Caption>Total Items: {watchItems.length}</Table.Caption>
               <Table.Thead style={{ zIndex: 0 }}>
                 <Table.Tr>
                   <Table.Th>Serial Number</Table.Th>
@@ -593,6 +593,7 @@ export default function SaleItemsTable(props: {
               Return
             </Button>
           </Flex>
+
           <Flex gap={3}>
             <Button
               onClick={() => {
@@ -624,6 +625,34 @@ export default function SaleItemsTable(props: {
             </Button>
             <div style={{ width: "100%" }}> </div>
           </Flex>
+          <Card w={"100%"} shadow="xs" padding="xl" radius="0" withBorder>
+            <Stack h={"100%"}>
+              <Flex justify="space-between">
+                <Title order={4}>Total Items:</Title>
+                <Title order={4}>{watchItems.length}</Title>
+              </Flex>
+
+              <Flex justify="space-between">
+                <Title order={4}>Total In $:</Title>
+                <Title order={4}>
+                  $
+                  <NumberFormatter thousandSeparator="," value={totals.total} />
+                </Title>
+              </Flex>
+
+              <Divider variant="dotted" size={"md"} />
+              <Flex justify="space-between">
+                <Title order={4}>Total In L.L:</Title>
+                <Title order={4}>
+                  ل.ل{" "}
+                  <NumberFormatter
+                    thousandSeparator=","
+                    value={Math.ceil(totals.total * (props.rate ?? 1))}
+                  />
+                </Title>
+              </Flex>
+            </Stack>
+          </Card>
         </Stack>
         <Stack>
           <Flex justify={"space-between"} gap={3} style={{}}>

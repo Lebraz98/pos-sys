@@ -1,10 +1,16 @@
 "use client";
-import { deleteSale, updateSalePayments } from "@/services/sale-service";
-import type { Customer } from "@/types";
+import {
+  closeSale,
+  deleteSale,
+  getSales,
+  updateSalePayments,
+} from "@/services/sale-service";
+import type { Customer, Sale } from "@/types";
 import {
   Box,
   Button,
   Card,
+  Checkbox,
   Divider,
   Flex,
   LoadingOverlay,
@@ -21,7 +27,6 @@ import {
 import { DateInput } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import type { Prisma } from "@prisma/client";
-import { IconEdit, IconPlus, IconX } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
   MantineReactTable,
@@ -31,25 +36,9 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 
-export default function SalesTable(props: {
-  data: Prisma.SaleGetPayload<{
-    include: {
-      customer: true;
-      saleItems: {
-        include: {
-          rate: true;
-          item: {
-            include: {
-              product: true;
-            };
-          };
-        };
-      };
-      salePayments: true;
-    };
-  }>[];
-  customers: Customer[];
-}) {
+export default function SalesTable(props: { customers: Customer[] }) {
+  const [data, setData] = useState<Sale[]>([]);
+
   const [date, setDate] = useState<Date[]>([
     dayjs().startOf("D").toDate(),
     dayjs().endOf("D").toDate(),
@@ -57,30 +46,18 @@ export default function SalesTable(props: {
 
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
 
-  const data = useMemo(() => {
-    return props.data.filter(
-      (sale) =>
-        sale.createdAt >= date[0] &&
-        sale.createdAt <= date[1] &&
-        (!selectedCustomer || sale.customerId === +selectedCustomer)
-    );
-  }, [date, props.data, selectedCustomer]);
-
   const [isPending, setTranstion] = useTransition();
 
   const table = useMantineReactTable({
     columns,
     data: data,
     renderDetailPanel(props) {
-      const total = props.row.original.saleItems.reduce(
-        (prev, cur) => cur.price * cur.quantity + prev,
-        0
-      );
+      const total = props.row.original.total;
       const totalPaid = props.row.original.salePayments.reduce(
         (prev, cur) => cur.amount + prev,
         0
       );
-      const rate = props.row.original.saleItems[0].rate?.value ?? 1;
+      const rate = props.row.original.saleItems[0].rate?.value ?? 0;
       return (
         <Box>
           <LoadingOverlay visible={isPending} />
@@ -172,6 +149,7 @@ export default function SalesTable(props: {
     renderRowActionMenuItems: (data) => [
       data.row.original.type === "waiting" ? (
         <MenuItem
+          ta={"center"}
           key={1}
           onClick={() => {
             route.push(
@@ -181,10 +159,11 @@ export default function SalesTable(props: {
             );
           }}
         >
-          <IconEdit />
+          Edit
         </MenuItem>
       ) : (
         <MenuItem
+          ta={"center"}
           key={2}
           onClick={() => {
             route.push(
@@ -194,12 +173,12 @@ export default function SalesTable(props: {
             );
           }}
         >
-          <IconPlus />{" "}
+          Add Payment
         </MenuItem>
       ),
       <MenuItem
+        ta={"center"}
         key={0}
-        color="red"
         onClick={() => {
           const password = prompt("Enter your password to delete this sale");
           if (!password) {
@@ -219,7 +198,31 @@ export default function SalesTable(props: {
           }
         }}
       >
-        <IconX />
+        Delete
+      </MenuItem>,
+      <MenuItem
+        key={3}
+        ta={"center"}
+        onClick={() => {
+          const password = prompt("Enter your password to delete this sale");
+          if (!password) {
+            return;
+          }
+          if (password === "365272") {
+            if (confirm("Are you sure you want to close this sale")) {
+              setTranstion(() => {
+                closeSale(data.row.original.id);
+                notifications.show({
+                  message: "Sale Closed",
+                });
+              });
+            }
+          } else {
+            alert("Invalid Password");
+          }
+        }}
+      >
+        Close
       </MenuItem>,
     ],
   });
@@ -254,10 +257,7 @@ export default function SalesTable(props: {
 
     data.forEach((sale) => {
       if (sale.type === "cash") {
-        cashIn += sale.saleItems.reduce(
-          (prev, cur) => prev + cur.price * cur.quantity,
-          0
-        );
+        cashIn += sale.total;
       } else if (sale.type === "credit") {
         credit += sale.salePayments.reduce((prev, cur) => prev + cur.amount, 0);
         unPaid =
@@ -309,6 +309,17 @@ export default function SalesTable(props: {
     },
     [route, searchParams]
   );
+  const getData = useCallback(() => {
+    setTranstion(() => {
+      getSales({
+        customerId: selectedCustomer ? +selectedCustomer : undefined,
+        fromDate: date[0],
+        toDate: date[1],
+      }).then((data) => {
+        setData(data);
+      });
+    });
+  }, [selectedCustomer, date]);
 
   return (
     <Box p={6}>
@@ -326,6 +337,19 @@ export default function SalesTable(props: {
           }}
         />
 
+        <Checkbox
+          label="All Dates"
+          onChange={(e) => {
+            if (!e.target.checked) {
+              setDate([
+                dayjs().startOf("D").toDate(),
+                dayjs().endOf("D").toDate(),
+              ]);
+            } else {
+              setDate([]);
+            }
+          }}
+        />
         <Select
           data={customers}
           placeholder="All"
@@ -336,6 +360,9 @@ export default function SalesTable(props: {
             setSelectedCustomer(e ?? undefined);
           }}
         />
+        <Button onClick={getData} loading={isPending}>
+          Search
+        </Button>
       </Flex>
 
       <Flex justify={"space-around"} gap={5} mb={6}>
@@ -500,7 +527,7 @@ const columns: MRT_ColumnDef<
         (prev, cur) => cur.price * cur.quantity + prev,
         0
       );
-      const rate = originalRow.saleItems[0].rate?.value ?? 1;
+      const rate = originalRow.saleItems[0].rate?.value ?? 0;
       return (
         <div>
           ل.ل

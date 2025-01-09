@@ -61,5 +61,27 @@ type ItemNeeded = Prisma.ItemNeededGetPayload<{
   };
 }>;
 type Rate = Prisma.RateGetPayload<undefined>;
+type Invoice = Prisma.InvoiceGetPayload<{
+  include: {
+    customer: true;
+    payments: true;
+    rate: true;
+  };
+}>;
 
-export type { Item, Product, Customer, Sale, SalePayment, ItemNeeded, Rate };
+type Payment = Prisma.PaymentGetPayload<{
+  include: {
+    invoice: true;
+    rate: true;
+  };
+}>;
+export type {
+  Item,
+  Product,
+  Customer,
+  Sale,
+  SalePayment,
+  ItemNeeded,
+  Rate,
+  Invoice,
+};
