@@ -17,10 +17,13 @@ export default async function RootLayout({
           padding: "10px",
           marginBottom: "10px",
           color: "white",
+          display: "flex",
+          alignItems: "center",
           fontSize: "20px",
           position: "absolute",
           top: "0",
           right: "0",
+          height: "80px",
         }}
       >
         Rate:{" "}

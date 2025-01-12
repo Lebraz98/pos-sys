@@ -21,6 +21,45 @@ export async function getItem(id: number) {
     },
   });
 }
+export async function searchForItem({
+  search,
+  byName,
+}: {
+  search: string;
+  byName?: boolean;
+}) {
+  if (byName) {
+    return prisma.item.findMany({
+      where: {
+        name: {
+          contains: search,
+        },
+      },
+      include: {
+        product: true,
+      },
+    });
+  }
+  return prisma.item.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: search,
+          },
+        },
+        {
+          serialNumber: {
+            contains: search,
+          },
+        },
+      ],
+    },
+    include: {
+      product: true,
+    },
+  });
+}
 
 export async function createItem(data: ItemValidator) {
   const isItemExist = await prisma.item.findFirst({

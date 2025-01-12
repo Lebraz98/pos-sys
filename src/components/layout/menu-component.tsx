@@ -19,7 +19,6 @@ export default function MenuComponent() {
   const { push } = useRouter();
   return (
     <>
-      {" "}
       <Drawer
         opened={opened}
         position="right"
@@ -37,6 +36,7 @@ export default function MenuComponent() {
               leftSection={<IconFiles />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -50,6 +50,7 @@ export default function MenuComponent() {
               leftSection={<IconTools />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -63,6 +64,7 @@ export default function MenuComponent() {
               leftSection={<IconTools />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -77,6 +79,7 @@ export default function MenuComponent() {
               leftSection={<IconHistory />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -90,6 +93,7 @@ export default function MenuComponent() {
               leftSection={<IconUser />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -103,6 +107,7 @@ export default function MenuComponent() {
               leftSection={<IconDevicesDollar />}
               style={{
                 backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
                 display: "flex",
               }}
               onClick={() => {
@@ -116,12 +121,14 @@ export default function MenuComponent() {
       </Drawer>
       <Button
         fullWidth
-        leftSection={<IconDots />}
         color="gray"
+        h={80}
         onClick={() => {
           menu.open();
         }}
-      ></Button>
+      >
+        <IconDots />
+      </Button>
     </>
   );
 }

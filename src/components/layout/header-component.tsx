@@ -14,7 +14,7 @@ export default function HeaderComponent() {
         {path !== "/dashboard" && (
           <div>
             <Button
-              color="white"
+              color="dark"
               variant="transparent"
               onClick={() => replace("/dashboard")}
             >

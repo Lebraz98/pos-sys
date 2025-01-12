@@ -18,12 +18,17 @@ const geistMono = localFont({
   weight: "100 900",
 });
 import "@mantine/core/styles.css";
-import { ColorSchemeScript, MantineProvider } from "@mantine/core";
+import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
 
 export const metadata: Metadata = {
   title: "POS",
   description: "POS",
 };
+const theme = createTheme({
+  fontFamily: "Verdana, sans-serif",
+  fontFamilyMonospace: "Monaco, Courier, monospace",
+  headings: { fontFamily: "Greycliff CF, sans-serif" },
+});
 
 export default function RootLayout({
   children,
@@ -36,7 +41,7 @@ export default function RootLayout({
         <ColorSchemeScript />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <MantineProvider defaultColorScheme="dark">
+        <MantineProvider forceColorScheme="light" theme={theme}>
           <Notifications />
           {children}
         </MantineProvider>

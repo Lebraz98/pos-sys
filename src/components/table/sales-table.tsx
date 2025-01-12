@@ -187,9 +187,11 @@ export default function SalesTable(props: { customers: Customer[] }) {
           if (password === "365272") {
             if (confirm("Are you sure you want to delete this sale")) {
               setTranstion(() => {
-                deleteSale(data.row.original.id);
-                notifications.show({
-                  message: "Sale Deleted",
+                deleteSale(data.row.original.id).then((res) => {
+                  notifications.show({
+                    message: "Sale Deleted",
+                  });
+                  getData();
                 });
               });
             }
