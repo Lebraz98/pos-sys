@@ -146,7 +146,10 @@ export default function SaleItemsTable(props: {
       setTransition(() => {
         const invoiceType = searchQuery.get("type");
 
-        if (invoiceType === "credit" && data.customerId === undefined) {
+        if (
+          (invoiceType === "credit" || invoiceType === "expensive") &&
+          data.customerId === undefined
+        ) {
           form.setError("customerId", {
             message: "Customer Required",
             type: "validate",
@@ -406,6 +409,18 @@ export default function SaleItemsTable(props: {
               }}
             >
               Credit
+            </Button>
+            <Button
+              color="red"
+              disabled={watchItems.length === 0}
+              size="xl"
+              fullWidth
+              onClick={() => {
+                form.setValue("type", "credit");
+                route.push("/dashboard?type=expensive");
+              }}
+            >
+              Expensive
             </Button>
             <SimpleGrid cols={2}>
               <Button
