@@ -8,6 +8,7 @@ import { getLastRate } from "./rate-service";
 export async function getSales(props?: {
   fromDate?: Date;
   toDate?: Date;
+  type?: string;
   customerId?: number;
 }) {
   return prisma.sale.findMany({
@@ -34,6 +35,7 @@ export async function getSales(props?: {
         lte: props?.toDate,
       },
       customerId: props?.customerId,
+      type: props?.type,
     },
   });
 }

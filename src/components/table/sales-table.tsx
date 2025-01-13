@@ -45,6 +45,7 @@ export default function SalesTable(props: { customers: Customer[] }) {
   ]);
 
   const [selectedCustomer, setSelectedCustomer] = useState<string>();
+  const [selectedType, setSelectedType] = useState<string>();
 
   const [isPending, setTranstion] = useTransition();
 
@@ -317,12 +318,13 @@ export default function SalesTable(props: { customers: Customer[] }) {
       getSales({
         customerId: selectedCustomer ? +selectedCustomer : undefined,
         fromDate: date[0],
+        type: selectedType,
         toDate: date[1],
       }).then((data) => {
         setData(data);
       });
     });
-  }, [selectedCustomer, date]);
+  }, [selectedCustomer, date, selectedType]);
 
   return (
     <Box p={6}>
@@ -351,6 +353,16 @@ export default function SalesTable(props: { customers: Customer[] }) {
             } else {
               setDate([]);
             }
+          }}
+        />
+        <Select
+          data={["cash", "credit", "return", "expensive"]}
+          placeholder="Type"
+          searchable
+          clearable
+          value={selectedType}
+          onChange={(e) => {
+            setSelectedType(e ?? undefined);
           }}
         />
         <Select
