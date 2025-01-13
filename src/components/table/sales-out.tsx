@@ -164,7 +164,7 @@ export default function SaleItemsTable(props: {
         });
       });
     },
-    [form, route]
+    [form, route,searchQuery]
   );
   const [searchedItems, setSearchedItems] = useState<Item[] | null>(null);
 
