@@ -217,6 +217,7 @@ export default function SalesTable(props: { customers: Customer[] }) {
                 notifications.show({
                   message: "Sale Closed",
                 });
+                getData();
               });
             }
           } else {
