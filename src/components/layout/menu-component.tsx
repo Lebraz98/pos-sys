@@ -7,6 +7,7 @@ import {
   IconDots,
   IconFiles,
   IconHistory,
+  IconInvoice,
   IconTools,
   IconUser,
   IconUserDollar,
@@ -87,6 +88,20 @@ export default function MenuComponent() {
               }}
             >
               View Sales History
+            </Button>
+            <Button
+              fullWidth
+              leftSection={<IconInvoice />}
+              style={{
+                backgroundColor: "transparent",
+                color: "ThreeDDarkShadow",
+                display: "flex",
+              }}
+              onClick={() => {
+                push("/dashboard/invoices");
+              }}
+            >
+              View Invoices
             </Button>
             <Button
               fullWidth

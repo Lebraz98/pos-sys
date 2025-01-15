@@ -9,6 +9,7 @@ export async function getInvoices(props?: {
   fromDate?: Date;
   toDate?: Date;
   customerId?: number;
+  type?: string;
 }) {
   return prisma.invoice.findMany({
     orderBy: {
@@ -17,12 +18,14 @@ export async function getInvoices(props?: {
     include: {
       customer: true,
       rate: true,
+      payments: true,
     },
     where: {
       createdAt: {
         gte: props?.fromDate,
         lte: props?.toDate,
       },
+      type: props?.type,
       customerId: props?.customerId,
     },
   });
