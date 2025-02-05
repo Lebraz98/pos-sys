@@ -6,18 +6,24 @@ import {
   Flex,
   LoadingOverlay,
   MenuItem,
+  Modal,
   NumberFormatter,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconEdit, IconX } from "@tabler/icons-react";
+import { IconEdit, IconPrinter, IconX } from "@tabler/icons-react";
+import ReactPDF from "@react-pdf/renderer";
+
 import {
   MantineReactTable,
   useMantineReactTable,
   type MRT_ColumnDef,
 } from "mantine-react-table";
 import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useMemo, useTransition } from "react";
+import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import ItemFrom from "../form/item-form";
+import { useDisclosure } from "@mantine/hooks";
+import { Document, Page } from "react-pdf";
+import ItemPdfView from "../view/item-pdf";
 
 export default function ItemTable(props: {
   data: Item[];
@@ -25,8 +31,10 @@ export default function ItemTable(props: {
   products: Product[];
 }) {
   const route = useRouter();
+  const [opened, { open, close }] = useDisclosure(false);
 
   const [isPending, setTranstions] = useTransition();
+  const [selectedItem, setSelectedItem] = useState<Item | undefined>();
 
   const onEdit = useCallback(
     (id: number) => {
@@ -159,6 +167,16 @@ export default function ItemTable(props: {
       >
         <IconX />
       </MenuItem>,
+      <MenuItem
+        color="blue"
+        key={5}
+        onClick={() => {
+          setSelectedItem(data.row.original);
+          open();
+        }}
+      >
+        <IconPrinter />
+      </MenuItem>,
     ],
   });
 
@@ -174,7 +192,9 @@ export default function ItemTable(props: {
         <Flex justify={"end"} mb={10}>
           <ItemFrom products={props.products} />
         </Flex>
-
+        <Modal opened={opened} onClose={close} title={selectedItem?.name}>
+          <ItemPdfView item={selectedItem} />
+        </Modal>
         <MantineReactTable table={table} />
       </Box>
     </Suspense>

@@ -67,7 +67,13 @@ type Invoice = Prisma.InvoiceGetPayload<{
     payments: true;
     rate: true;
   };
-}>;
+}> & {
+  JsonData?: {
+    title: string;
+    price: number;
+    quantity: number;
+  }[];
+};
 
 type Payment = Prisma.PaymentGetPayload<{
   include: {
@@ -75,6 +81,30 @@ type Payment = Prisma.PaymentGetPayload<{
     rate: true;
   };
 }>;
+
+export function getInvoiceWithJsonData(data?: Invoice): Invoice | undefined {
+  return data
+    ? {
+        ...data,
+        JsonData: data.data
+          ? JSON.parse(data.data).map((item) => ({
+              title: item.product.name,
+              price: item.price,
+              quantity: item.quantity,
+            }))
+          : [],
+      }
+    : data;
+}
+export function serlizeInvoiceData(data?: string | null): Invoice["JsonData"] {
+  return data
+    ? JSON.parse(data ?? "[]").map((item) => ({
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+      }))
+    : [];
+}
 export type {
   Item,
   Product,

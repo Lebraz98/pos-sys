@@ -8,6 +8,7 @@ const InvoiceValidator = z.object({
   type: z.string(),
   customerId: z.number(),
   date: z.date(),
+  data: z.string().optional().nullable().default("[]"),
 });
 type InvoiceValidator = z.infer<typeof InvoiceValidator>;
 export default InvoiceValidator;

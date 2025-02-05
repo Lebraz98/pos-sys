@@ -51,12 +51,53 @@ export async function createInvoice(data: InvoiceValidator) {
       rateId: rate?.[0]?.id,
       date: data.date,
       type: data.type,
+      data: data.data,
     },
   });
 
   revalidatePath("/dashboard", "layout");
   return {
     message: "Invoice created successfully",
+  };
+}
+export async function updateInvoice(id: number, data: InvoiceValidator) {
+  const invoice = await prisma.invoice.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!invoice) {
+    return {
+      error: {
+        key: "id",
+        message: "Invoice not found",
+      },
+    };
+  }
+
+  const rate = await getLastRate();
+
+  await prisma.invoice.update({
+    where: {
+      id: id,
+    },
+    data: {
+      customerId: data.customerId,
+      note: data.note,
+      title: data.title,
+      description: data.description,
+      amount: data.amount,
+      rateId: rate?.[0]?.id,
+      date: data.date,
+      type: data.type,
+      data: data.data,
+    },
+  });
+
+  revalidatePath("/dashboard", "layout");
+  return {
+    message: "Invoice updated successfully",
   };
 }
 

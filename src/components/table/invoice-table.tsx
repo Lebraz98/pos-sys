@@ -1,5 +1,5 @@
 "use client";
-import { getInvoices } from "@/services/invoice-service";
+import { deleteInvoice, getInvoices } from "@/services/invoice-service";
 import {
   closeSale,
   deleteSale,
@@ -35,7 +35,16 @@ import {
   type MRT_ColumnDef,
 } from "mantine-react-table";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { Controller } from "react-hook-form";
+import InvoiceForm from "../form/invoice-form";
 
 export default function InvoiceTable(props: { customers: Customer[] }) {
   const [data, setData] = useState<Invoice[]>([]);
@@ -59,35 +68,29 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
     },
     enableRowActions: true,
     renderRowActionMenuItems: (data) => [
-      data.row.original.type === "waiting" ? (
-        <MenuItem
-          ta={"center"}
-          key={1}
-          onClick={() => {
-            route.push(
-              "/dashboard/sale-history?open-edit=true&" +
-                "id=" +
-                data.row.original.id
-            );
-          }}
-        >
-          Edit
-        </MenuItem>
-      ) : (
-        <MenuItem
-          ta={"center"}
-          key={2}
-          onClick={() => {
-            route.push(
-              "/dashboard/sale-history?open=true&" +
-                "id=" +
-                data.row.original.id
-            );
-          }}
-        >
-          Add Payment
-        </MenuItem>
-      ),
+      <MenuItem
+        ta={"center"}
+        key={1}
+        onClick={() => {
+          route.push(
+            "/dashboard/invoices?form=true" + "&id=" + data.row.original.id
+          );
+        }}
+      >
+        Edit
+      </MenuItem>,
+
+      <MenuItem
+        ta={"center"}
+        key={2}
+        onClick={() => {
+          route.push(
+            "/dashboard/invoices?form=true&" + "id=" + data.row.original.id
+          );
+        }}
+      >
+        Add Payment
+      </MenuItem>,
       <MenuItem
         ta={"center"}
         key={0}
@@ -99,9 +102,9 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
           if (password === "365272") {
             if (confirm("Are you sure you want to delete this sale")) {
               setTranstion(() => {
-                deleteSale(data.row.original.id).then(() => {
+                deleteInvoice(data.row.original.id).then((res) => {
                   notifications.show({
-                    message: "Sale Deleted",
+                    message: res.message,
                   });
                   getData();
                 });
@@ -216,7 +219,7 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
                 message: data.message,
               });
               setAmount(0);
-              route.replace("/dashboard/sale-history");
+              route.replace("/dashboard/invoices");
             }
           });
         });
@@ -236,7 +239,10 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
       });
     });
   }, [selectedCustomer, date, selectedType]);
-
+  const searchBtn = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    getData();
+  }, []);
   return (
     <Box p={6}>
       <Flex gap={10} mb={5}>
@@ -286,108 +292,17 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
             setSelectedCustomer(e ?? undefined);
           }}
         />
-        <Button onClick={getData} loading={isPending}>
+        <Button ref={searchBtn} onClick={getData} loading={isPending}>
           Search
         </Button>
+        <InvoiceForm
+          customers={props.customers}
+          onUpdate={() => {
+            searchBtn.current?.click();
+          }}
+        />
       </Flex>
 
-      {/* <Flex justify={"space-around"} gap={5} mb={6}>
-        <Card w={"100%"}>
-          <Title size={"lg"}>Income</Title>
-          <div>
-            $
-            <NumberFormatter
-              thousandSeparator=","
-              value={amounts.cashIn + amounts.credit}
-            />
-          </div>
-        </Card>
-
-        <Card w={"100%"}>
-          <Title size={"lg"}>Unpaid</Title>
-          <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.unPaid} />
-          </div>
-        </Card>
-        <Card w={"100%"}>
-          <Title size={"lg"}>Expensive</Title>
-          <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.expensive} />
-          </div>
-        </Card>
-
-        <Card w={"100%"}>
-          <Title size={"lg"}>Return</Title>
-          <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.returns} />
-          </div>
-        </Card>
-
-        <Card w={"100%"}>
-          <Title size={"lg"}>Total</Title>
-          <div>
-            $<NumberFormatter thousandSeparator="," value={amounts.total} />
-          </div>
-        </Card>
-      </Flex> */}
-
-      {/* <Modal
-        title={`Sale History ${selectedSale?.id} `}
-        opened={searchParams.get("open") ? true : false}
-        onClose={() => {
-          route.replace("/dashboard/sale-history");
-          setAmount(0);
-        }}
-      >
-        <Modal.Body>
-          {remaining > 0 ? (
-            <Box
-              component="form"
-              display={"flex"}
-              style={{
-                gap: 5,
-                flexDirection: "column",
-              }}
-              onSubmit={(e) => {
-                e.preventDefault();
-
-                if (amount === 0) {
-                  return;
-                }
-                handleSubmit(amount);
-              }}
-            >
-              <Text>Invoice Id: {selectedSale?.invoiceId}</Text>
-              <Text>For: {selectedSale?.customer?.name}</Text>
-              <Text>Created At: {selectedSale?.createdAt.toDateString()}</Text>
-              <Text>Note: {selectedSale?.note}</Text>
-              <Text>
-                Remaining: $
-                <NumberFormatter value={remaining} />
-              </Text>
-              <Text>
-                Remaining: ل.ل
-                <NumberFormatter value={remaining} />
-              </Text>
-              <NumberInput
-                label="Paid"
-                min={0}
-                thousandSeparator
-                max={remaining}
-                value={amount}
-                onChange={(e) => {
-                  setAmount(e ? +e : 0);
-                }}
-              />
-              <Button type="submit" loading={isPending}>
-                Save
-              </Button>
-            </Box>
-          ) : (
-            <Text>Already Paid</Text>
-          )}
-        </Modal.Body>
-      </Modal> */}
       <MantineReactTable table={table} />
     </Box>
   );
@@ -399,8 +314,13 @@ const columns: MRT_ColumnDef<Invoice>[] = [
     header: "Id",
   },
   {
-    accessorKey: "invoiceId",
-    header: "Invoice Id",
+    accessorKey: "title",
+    header: "Title",
+  },
+
+  {
+    accessorKey: "description",
+    header: "Description",
   },
   {
     accessorKey: "note",
@@ -410,19 +330,37 @@ const columns: MRT_ColumnDef<Invoice>[] = [
     accessorKey: "customer.name",
     header: "Customer Name",
   },
+
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "amount",
+    header: "Amount",
+    Cell(props) {
+      return (
+        <>
+          $
+          <NumberFormatter
+            value={`${props.row.original.amount}`}
+            thousandSeparator
+          />
+        </>
+      );
+    },
   },
+
   {
     accessorKey: "type",
     header: "Type",
   },
-
+  {
+    accessorFn(originalRow) {
+      return dayjs(originalRow.date).format("DD-MM-YYYY");
+    },
+    header: "Date",
+  },
   {
     accessorFn(originalRow) {
       return dayjs(originalRow.createdAt).format("DD-MM-YYYY");
     },
-    header: "Date",
+    header: "Created At",
   },
 ];
