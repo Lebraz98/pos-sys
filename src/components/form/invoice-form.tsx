@@ -262,7 +262,7 @@ export default function InvoiceForm(props: {
             <Controller
               control={form.control}
               name="data"
-              render={({ field, fieldState }) => (
+              render={({ field }) => (
                 <>
                   <Flex justify={"space-between"} align={"center"}>
                     <Text>Items</Text>

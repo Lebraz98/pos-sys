@@ -242,7 +242,7 @@ export default function InvoiceTable(props: { customers: Customer[] }) {
   const searchBtn = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
   return (
     <Box p={6}>
       <Flex gap={10} mb={5}>
