@@ -11,7 +11,6 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconEdit, IconPrinter, IconX } from "@tabler/icons-react";
-import ReactPDF from "@react-pdf/renderer";
 
 import {
   MantineReactTable,
@@ -22,7 +21,6 @@ import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import ItemFrom from "../form/item-form";
 import { useDisclosure } from "@mantine/hooks";
-import { Document, Page } from "react-pdf";
 import ItemPdfView from "../view/item-pdf";
 
 export default function ItemTable(props: {
