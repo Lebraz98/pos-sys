@@ -85,14 +85,14 @@ export default function BarcodePrintView(props?: { item?: Item, rate: number }) 
       renderRoot.render(
         <MantineProvider defaultColorScheme="light" forceColorScheme="light">
           <div id="print-body">
-            <h3>
+            <h3 dir="auto">
               {props?.item?.name}
             </h3>
             <h3>
               $<NumberFormatter value={props?.item?.sell} thousandSeparator />
             </h3>
             <h3 dir="auto">
-              <NumberFormatter value={(props?.item?.sell ?? 1) * (props?.rate ?? 1)} thousandSeparator /> ل.ل
+              <NumberFormatter value={Math.ceil((props?.item?.sell ?? 1) * (props?.rate ?? 1))} thousandSeparator /> ل.ل
             </h3>
             <Barcode
               value={props?.item?.serialNumber ?? ""}
@@ -137,7 +137,7 @@ export default function BarcodePrintView(props?: { item?: Item, rate: number }) 
                 padding: "10px",
               }}
             >
-              <Text size="xs">
+              <Text size="xs" dir="auto">
                 {props?.item?.name}
               </Text>
               <Text size="xs">
@@ -146,7 +146,7 @@ $               <NumberFormatter value={props?.item?.sell} thousandSeparator />
               </Text>
               <Text size="xs" dir="auto">
 
- <NumberFormatter value={props?.item?.sell*props.rate} thousandSeparator /> ل.ل
+ <NumberFormatter value={Math.ceil((props?.item?.sell ?? 1) * (props?.rate ?? 1))} thousandSeparator /> ل.ل
               </Text>
               <Barcode
                 value={props?.item?.serialNumber ?? ""}

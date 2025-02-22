@@ -49,6 +49,9 @@ export default function ItemTable(props: {
       {
         accessorKey: "name",
         header: "Name",
+        Cell(props) {
+          return <span dir="auto">{props.row.original.name}</span>
+        },
       },
       {
         accessorKey: "description",
@@ -96,7 +99,7 @@ export default function ItemTable(props: {
             <span style={{ color: "green" }}>
               ل.ل
               <NumberFormatter
-                value={data.row.original.sell * +props.rate}
+                value={Math.ceil((data.row.original.sell * +props.rate))}
                 thousandSeparator=","
               />
             </span>
