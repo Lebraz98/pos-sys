@@ -12,7 +12,7 @@ import { useRef } from "react";
 import Barcode from "react-barcode";
 import { createRoot } from "react-dom/client";
 
-export default function BarcodePrintView(props?: { item?: Item }) {
+export default function BarcodePrintView(props?: { item?: Item,rate:number }) {
   const barcodeRef = useRef<HTMLDivElement>(null);
 
   const handleOpenPopup = () => {
@@ -88,6 +88,7 @@ export default function BarcodePrintView(props?: { item?: Item }) {
             <h3>
               {props?.item?.name} - $
               <NumberFormatter value={props?.item?.sell} thousandSeparator />
+              - <NumberFormatter value={(props?.item?.sell??1) * (props?.rate??1)} thousandSeparator />ل.ل
             </h3>
             <Barcode
               value={props?.item?.serialNumber ?? ""}

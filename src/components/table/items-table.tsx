@@ -191,7 +191,7 @@ export default function ItemTable(props: {
           <ItemFrom products={props.products} />
         </Flex>
         <Modal opened={opened} onClose={close} title={selectedItem?.name}>
-          <ItemPdfView item={selectedItem} />
+          <ItemPdfView item={selectedItem}  rate={props.rate}/>
         </Modal>
         <MantineReactTable table={table} />
       </Box>
