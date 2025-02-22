@@ -12,7 +12,7 @@ import { useRef } from "react";
 import Barcode from "react-barcode";
 import { createRoot } from "react-dom/client";
 
-export default function BarcodePrintView(props?: { item?: Item,rate:number }) {
+export default function BarcodePrintView(props?: { item?: Item, rate: number }) {
   const barcodeRef = useRef<HTMLDivElement>(null);
 
   const handleOpenPopup = () => {
@@ -67,7 +67,7 @@ export default function BarcodePrintView(props?: { item?: Item,rate:number }) {
                   }
 
                   h3:first-child {
-                    margin-top: 9px;
+                    margin-top: 2px;
                     text-align: start;
                     margin-left: 5px;
                     font-size: 10px;
@@ -86,9 +86,13 @@ export default function BarcodePrintView(props?: { item?: Item,rate:number }) {
         <MantineProvider defaultColorScheme="light" forceColorScheme="light">
           <div id="print-body">
             <h3>
-              {props?.item?.name} - $
-              <NumberFormatter value={props?.item?.sell} thousandSeparator />
-              - <NumberFormatter value={(props?.item?.sell??1) * (props?.rate??1)} thousandSeparator />ل.ل
+              {props?.item?.name}
+            </h3>
+            <h3>
+              $<NumberFormatter value={props?.item?.sell} thousandSeparator />
+            </h3>
+            <h3 dir="auto">
+              <NumberFormatter value={(props?.item?.sell ?? 1) * (props?.rate ?? 1)} thousandSeparator /> ل.ل
             </h3>
             <Barcode
               value={props?.item?.serialNumber ?? ""}
@@ -134,8 +138,15 @@ export default function BarcodePrintView(props?: { item?: Item,rate:number }) {
               }}
             >
               <Text size="xs">
-                {props?.item?.name} - $
-                <NumberFormatter value={props?.item?.sell} thousandSeparator />
+                {props?.item?.name}
+              </Text>
+              <Text size="xs">
+
+$               <NumberFormatter value={props?.item?.sell} thousandSeparator />
+              </Text>
+              <Text size="xs" dir="auto">
+
+ <NumberFormatter value={props?.item?.sell*props.rate} thousandSeparator /> ل.ل
               </Text>
               <Barcode
                 value={props?.item?.serialNumber ?? ""}
