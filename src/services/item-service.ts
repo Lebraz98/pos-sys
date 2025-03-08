@@ -125,14 +125,7 @@ export async function updateItem(id: number, data: ItemValidator) {
       },
     };
   }
-  if (isItemExist.serialNumber == data.serialNumber) {
-    return {
-      error: {
-        key: "serialNumber",
-        message: "Item serialNumber already exist",
-      },
-    };
-  }
+  
   
   await prisma.item.update({
     where: {
