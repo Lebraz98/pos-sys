@@ -61,19 +61,40 @@ export default function SaleItemsTable(props: {
 
   const addItem = useCallback(
     (e: Item) => {
-      form.setValue(
-        "saleItems",
-        [
-          ...watchItems,
-          {
-            itemId: e.id,
-            quantity: 1,
-            price: e.sell,
-            total: e.sell,
-            saleId: 0,
-          } as any,
-        ].reverse()
+      const itemExists = watchItems.find(
+        (item) => item.itemId === e.id && item.saleId === 0
       );
+      if (itemExists) {
+        const itemIndex = watchItems.findIndex(
+          (item) => item.itemId === e.id && item.saleId === 0
+        );
+        form.setValue(
+          "saleItems",
+          watchItems.map((item, i) =>
+            i === itemIndex
+              ? {
+                  ...item,
+                  quantity: item.quantity + 1,
+                  total: item.price * (item.quantity + 1),
+                }
+              : item
+          )
+        );
+      } else {
+        form.setValue(
+          "saleItems",
+          [
+            ...watchItems,
+            {
+              itemId: e.id,
+              quantity: 1,
+              price: e.sell,
+              total: e.sell,
+              saleId: 0,
+            } as any,
+          ].reverse()
+        );
+      }
       setSearch("");
       setSelectedItem(0);
       const itemRow = document.getElementById(`table-item-${0}}`);
@@ -164,7 +185,7 @@ export default function SaleItemsTable(props: {
         });
       });
     },
-    [form, route,searchQuery]
+    [form, route, searchQuery]
   );
   const [searchedItems, setSearchedItems] = useState<Item[] | null>(null);
 
